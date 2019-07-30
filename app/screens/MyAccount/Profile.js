@@ -1,9 +1,12 @@
 import React, { Component } from "react";
-import { StyleSheet, View, Text } from "react-native";
+import { StyleSheet, View, Text, ActivityIndicator } from "react-native";
 import { Button } from "react-native-elements";
 import * as firebase from "firebase";
+import ProfileGuest from "../../components/Profile/ProfileGuest"
+import ProfileUser from "../../components/Profile/ProfileUser"
 
 export default class Profile extends Component {
+    
     constructor(){
         super();
         this.state = {
@@ -22,7 +25,7 @@ export default class Profile extends Component {
       
     });
   }
-  gotoScreen = nameScreen => {
+  goToScreen = nameScreen => {
     this.props.navigation.navigate(nameScreen);
   };
 
@@ -34,20 +37,11 @@ export default class Profile extends Component {
     const { login } = this.state;
     if (login) {
       return (
-      <View style={styles.viewBody}>
-      <Text>Estas logeado</Text>
-      <Button title="Cerrar sesión" onPress={()=> this.logout()}></Button>
-      </View>);
+      <ProfileUser></ProfileUser>
+        );
     } else {
       return (
-        <View style="styles.viewBody">
-          <Text>Profile Screen</Text>
-          <Button
-            title="Registro"
-            onPress={() => this.gotoScreen("Registration")}
-          />
-          <Button title="Login" onPress={() => this.gotoScreen("Login")} />
-        </View>
+          <ProfileGuest goToScreen={this.goToScreen} />      
       );
     }
   }

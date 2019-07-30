@@ -27,7 +27,7 @@ export default (inputTemplate = locals => {
 
 const styles = StyleSheet.create({
   view: {
-    marginBottom: 40
+    marginBottom: 20
   },
   iconContainer: {
     paddingRight: 20

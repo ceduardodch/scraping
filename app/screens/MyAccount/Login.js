@@ -34,7 +34,7 @@ export default class Map extends Component {
         .auth()
         .signInWithEmailAndPassword(validate.email, validate.password)
         .then(resolve => {
-          this.refs.toast.show("Registro correcto", 200, () => {
+          this.refs.toast.show("Registro correcto", 100, () => {
             this.props.navigation.navigate("Profile");
           });
         })
@@ -50,9 +50,7 @@ export default class Map extends Component {
           }
         });
     } else {
-      this.setState({
-        loginErrorMessage: "Introduzca formulario correctamente"
-      });
+      this.refs.toast.show("Contraseña o email incorrectos", 1500);
     }
   };
 
@@ -63,11 +61,30 @@ export default class Map extends Component {
     );
     console.log(type);
     console.log(token);
-  }
+    if (type == "success") {
+      const credentials = firebase.auth.FacebookAuthProvider.credential(token);
+      firebase
+        .auth()
+        .signInWithCredential(credentials)
+        .then(() => {
+          console.log("Login correcto");
+          this.props.navigation.goBack();
+        })
+        .catch(err => {
+          console.log("Error accediendo con Facebook, intentelo mas tarde");
+        });
+    } else if (type == "cancel") {
+      console.log("Inicio de sesion cancelad");
+    } else {
+      console.log("Erro desconocido, intentelo mas tarde");
+    }
+  };
+  
   onChangeFormLogin = loginValue => {
     this.setState({
       loginData: loginValue
     });
+    console.log(loginValue);
   };
 
   render() {
@@ -85,7 +102,7 @@ export default class Map extends Component {
           containerStylestyle={styles.containerLogo}
           style={styles.logo}
           PlaceholderContent={<ActivityIndicator />}
-          ResizeMode="contain"
+          resizeMode="contain"
         />
 
         <View style={styles.viewLogin}>
@@ -101,6 +118,10 @@ export default class Map extends Component {
             title="Ingresar"
             onPress={() => this.login()}
           />
+          <Text style={styles.textRegister}>¿Aún no tienes una cuenta?
+          <Text style={styles.btnRegister} 
+          onPress={()=>this.props.navigation.navigate("Registration")}> Registrate</Text>
+          </Text>
           <Text style={styles.loginErrorMessage}>{loginErrorMessage}</Text>
           <Divider style={styles.divider}></Divider>
           <SocialIcon title="Iniciar con Facebook" button type="facebook"
@@ -123,12 +144,12 @@ export default class Map extends Component {
 const styles = StyleSheet.create({
   viewBody: {
     flex: 1,
-    marginLeft: 40,
-    marginRight: 40,
-    marginTop: 40
+    marginLeft: 30,
+    marginRight: 30,
+    marginTop: 30
   },
   viewLogin: {
-    marginTop: 20
+    marginTop: 10
   },
   containerLogo: {
     alignItems: "center",
@@ -147,10 +168,21 @@ const styles = StyleSheet.create({
   loginErrorMessage: {
     color: "#ff0000",
     textAlign: "center",
-    marginTop: 20
+    marginTop: 20,
+    marginBottom: 20
   },
   divider:{
  backgroundColor: "#00a680",
  marginBottom:20
+  },
+  textRegister:{
+    marginTop:15,
+    marginRight:10, 
+    marginLeft:10
+  },
+  btnRegister:{
+    color:"#00a680",
+    fontWeight:"bold"
+
   }
 });
