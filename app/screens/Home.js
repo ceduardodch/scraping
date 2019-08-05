@@ -15,14 +15,18 @@ export default class Home extends Component
           lastnames: '',
           sex: '',
           birthdate: '',
-          deceased: ''},
+          deceased: '',
+          marital_status:'',
+          titulos_universitarios_ids:''
+        }, 
+          formTitulos:[],
           loaded:true
         };
         
     }
     async buscarPersona() {
         this.setState({loaded:false});
-        const { cedula, names, lastnames, sex, birthdate, deceased } = this.state;        
+        const { formRegistro, cedula} = this.state;        
         const odoo = new Odoo({
           host: 'scraping.fractal-soft.com',
           port: 8069, /* Defaults to 80 if not specified */
@@ -38,8 +42,10 @@ export default class Home extends Component
         /* Get partner from server example */
         const params = {
           domain: [["identity", "=", cedula]],
-          fields: ["names", "lastnames", "sex", "birthdate", "deceased"],
+          fields: [ "names", "lastnames", "sex", "birthdate", "deceased", 
+                    "marital_status","titulos_universitarios_ids"],
         }
+
         const context = {
           domain: [["id", "=", 1]],
         }
@@ -52,17 +58,34 @@ export default class Home extends Component
               lastnames: response.data[0].lastnames,
               sex: response.data[0].sex,
               birthdate: response.data[0].birthdate,
-              deceased: response.data[0].deceased}
-            })          
+              deceased: response.data[0].deceased,
+              marital_status:response.data[0].marital_status,
+              titulos_universitarios_ids:response.data[0].titulos_universitarios_ids
+            }              
+            }
+            )        
           })
           .catch(e => { alert(e) });
+
+          const params1 = {
+            domain: [["id", "=", this.state.formRegistro.titulos_universitarios_ids]],
+            fields: [ "title", "degree_date"],
+          }
+          await odoo.search_read('scraping.titulos', params1, context)
+          .then(response => {
+            this.setState({
+                formTitulos: response.data}            
+            )            
+          })
+          .catch(e => { alert(e) });
+
 
         this.setState({loaded:true});
       }
       
 
     render(){
-        const {loaded, search} = this.state
+        const {formTitulos,loaded} = this.state
 
         if(!loaded)
         {
@@ -82,7 +105,15 @@ export default class Home extends Component
       <Text style={styles.name}>Apellidos: <Text style={styles.label}>{this.state.formRegistro.lastnames}</Text></Text>
       <Text style={styles.name}>Sexo: <Text style={styles.label}>{this.state.formRegistro.sex}</Text></Text>
       <Text style={styles.name}>Fecha nacimiento: <Text style={styles.label}>{this.state.formRegistro.birthdate}</Text></Text>
-      <Text style={styles.name}>Fallecido?: <Text style={styles.label}>{this.state.formRegistro.deceased}</Text></Text>
+      <Text style={styles.name}>Fallecido: <Text style={styles.label}>{this.state.formRegistro.deceased}</Text></Text>
+      <Text style={styles.name}>Estado Civil: <Text style={styles.label}>{this.state.formRegistro.marital_status}</Text></Text>
+      
+      </Card>
+      <Card title="TÍTULOS">
+          {formTitulos.map((item, index)=>(
+           <Text key={index}>{item.title}  <Text key={index}>- {item.degree_date}</Text></Text>
+           
+          ))}
       </Card>
 </View>
     );}}
