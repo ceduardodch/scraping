@@ -85,7 +85,8 @@ const RootStack = createBottomTabNavigator(
       Mapa: {
         screen: mapScreenStack,
         navigationOptions: ({ navigation }) => ({
-          tabBarLabel: "Mapa",
+          header: null,
+          tabBarLabel: "Resumen",
           tabBarIcon: ({ tintColor }) => (
             <Icon
               name="google-maps"
@@ -98,7 +99,7 @@ const RootStack = createBottomTabNavigator(
     }
   },
   {
-    order:['Profile','Mapa','Home'],
+    order:['Profile','Home','Mapa'],
     tabBarOptions: {
       inactiveTintColor: "#6464",
       activeTintColor: "#00a680"

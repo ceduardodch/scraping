@@ -20,6 +20,7 @@ export default (inputTemplate = locals => {
         leftIcon={{type: locals.config.iconType,name: locals.config.iconName, size:24}}
         leftIconContainerStyle={styles.iconContainer}
         onChangeText={value=>locals.onChange(value)}
+        keyboardType={'numeric'}
       />
     </View>
   );

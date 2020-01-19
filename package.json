@@ -10,14 +10,16 @@
   "dependencies": {
     "expo": "^33.0.0",
     "expo-facebook": "~5.0.1",
-    "firebase": "^6.3.3",
+    "firebase": "^7.7.0",
     "react": "16.8.3",
     "react-dom": "^16.8.6",
     "react-native": "https://github.com/expo/react-native/archive/sdk-33.0.0.tar.gz",
     "react-native-easy-toast": "^1.2.0",
     "react-native-elements": "^1.1.0",
+    "react-native-gesture-handler": "^1.5.3",
     "react-native-maps": "^0.25.0",
     "react-native-odoo-promise-based": "^0.6.4",
+    "react-native-table-component": "^1.2.1",
     "react-native-web": "^0.11.4",
     "react-navigation": "^3.11.1",
     "tcomb-form-native": "^0.6.20"

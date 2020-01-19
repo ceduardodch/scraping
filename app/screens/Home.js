@@ -1,34 +1,63 @@
 import React, {Component} from "react";
-import {StyleSheet,View, Text} from  "react-native"
+import {StyleSheet,View, Text,SafeAreaView, ScrollView } from  "react-native"
 import Odoo from 'react-native-odoo-promise-based'
 import { Button, Input, Card  } from "react-native-elements";
 import PreLoader from "../components/PreLoader"
+import { FacturaStruct, FacturaOptions } from "../forms/Factura";
+import t from "tcomb-form-native";
+import { Table, TableWrapper, Row, Rows, Col, Cols, Cell } from 'react-native-table-component';
 
+
+const Form = t.form.Form;
 export default class Home extends Component
 {
     constructor(props) {
         super(props)
         this.state = {
+
+
+          facturaStruct: FacturaStruct,
+          facturaOptions: FacturaOptions,
+          facturaData: {
+            cedula: "",
+            cantidad: "",
+            monto: ""
+          },
+          facturaErrorMessage: "",
+      
           formRegistro:{
-          cedula: '',
           names: '',
           lastnames: '',
-          sex: '',
-          birthdate: '',
-          deceased: '',
-          marital_status:'',
-          titulos_universitarios_ids:''
+        }, 
+        tableHead: ['Descripción', 'Cantidad', 'Total'],
+        tableData: "",
+
+        formDetalle:{
+          cantidad: '',
+          monto: '',
+          total:'',
+          subsidio:''
         }, 
           formTitulos:[],
           loaded:true
         };
         
     }
-    async buscarPersona() {
-        this.setState({loaded:false});
-        const { formRegistro, cedula} = this.state;        
+    async facturar()
+    {
+
+    }
+    async buscarPersona(cantidad, monto) {
+        this.setState({loaded:false, tableData: [
+          ['Gas', cantidad, cantidad*1.6],        
+          ['Transporte', '1', monto - cantidad*1],        
+          ['',  'IVA', cantidad*1.6*0.12],        
+          ['',  'Total', monto],        
+          ['',  'Subsidio', '0.62'],         ],} 
+        );
+        const { formRegistro, facturaData:{cedula}} = this.state;        
         const odoo = new Odoo({
-          host: 'scraping.fractal-soft.com',
+          host: 'scraping.fractalsoft.ec',
           port: 8069, /* Defaults to 80 if not specified */
           database: 'scraping',
           username: 'ceduardodch@gmail.com', /* Optional if using a stored session_id */
@@ -37,13 +66,13 @@ export default class Home extends Component
         })
     
         await odoo.connect()
-          .then(response => { /* ... */ })
-          .catch(e => { /* ... */ })
+          .then(response => {  console.log(response);})
+          .catch(e => { console.log(e); })
         /* Get partner from server example */
+        console.log(cedula);
         const params = {
           domain: [["identity", "=", cedula]],
-          fields: [ "names", "lastnames", "sex", "birthdate", "deceased", 
-                    "marital_status","titulos_universitarios_ids"],
+          fields: [ "names", "lastnames"],
         }
 
         const context = {
@@ -55,37 +84,29 @@ export default class Home extends Component
             this.setState({
                 formRegistro:{
               names: response.data[0].names,
-              lastnames: response.data[0].lastnames,
-              sex: response.data[0].sex,
-              birthdate: response.data[0].birthdate,
-              deceased: response.data[0].deceased,
-              marital_status:response.data[0].marital_status,
-              titulos_universitarios_ids:response.data[0].titulos_universitarios_ids
-            }              
+              lastnames: response.data[0].lastnames,            
+            }, 
+            loaded:true       
             }
             )        
           })
           .catch(e => { alert(e) });
-
-          const params1 = {
-            domain: [["id", "=", this.state.formRegistro.titulos_universitarios_ids]],
-            fields: [ "title", "degree_date"],
-          }
-          await odoo.search_read('scraping.titulos', params1, context)
-          .then(response => {
-            this.setState({
-                formTitulos: response.data}            
-            )            
-          })
-          .catch(e => { alert(e) });
-
-
-        this.setState({loaded:true});
-      }
       
 
+    }
+      
+      onChangeFormFactura = facturaValue => {
+        this.setState({
+          facturaData: facturaValue
+        });
+        console.log(facturaValue);
+      };
     render(){
-        const {formTitulos,loaded} = this.state
+        const {loaded,
+          facturaOptions,
+          facturaStruct,
+          facturaData,
+          tableHead,tableData } = this.state
 
         if(!loaded)
         {
@@ -94,27 +115,31 @@ export default class Home extends Component
         return(
         
       <View style={styles.viewBody}>
-        <Input style={styles.inputBox}        
-          placeholder="Ingrese su cédula"
-          value={this.state.cedula}
-          onChangeText={(text) => { this.setState({ cedula: text }) }}          
-        />
-        <Button title="Buscar" onPress={()=> this.buscarPersona()}></Button>
+        <SafeAreaView style={styles.container}>
+      <ScrollView style={styles.scrollView}>
+          <Form
+            ref="facturaForm"
+            type={facturaStruct}
+            options={facturaOptions}
+            value={facturaData}
+            onChange={facturaValue => this.onChangeFormFactura(facturaValue)}
+          />
+
+
+      <Button title="Buscar" onPress={()=> this.buscarPersona(this.state.facturaData.cantidad, this.state.facturaData.monto)}></Button>
       <Card title="DATOS BÁSICOS">
       <Text style={styles.name}>Nombres: <Text style={styles.label}>{this.state.formRegistro.names}</Text></Text>
       <Text style={styles.name}>Apellidos: <Text style={styles.label}>{this.state.formRegistro.lastnames}</Text></Text>
-      <Text style={styles.name}>Sexo: <Text style={styles.label}>{this.state.formRegistro.sex}</Text></Text>
-      <Text style={styles.name}>Fecha nacimiento: <Text style={styles.label}>{this.state.formRegistro.birthdate}</Text></Text>
-      <Text style={styles.name}>Fallecido: <Text style={styles.label}>{this.state.formRegistro.deceased}</Text></Text>
-      <Text style={styles.name}>Estado Civil: <Text style={styles.label}>{this.state.formRegistro.marital_status}</Text></Text>
-      
+     
       </Card>
-      <Card title="TÍTULOS">
-          {formTitulos.map((item, index)=>(
-           <Text key={index}>{item.title}  <Text key={index}>- {item.degree_date}</Text></Text>
-           
-          ))}
-      </Card>
+      <Table borderStyle={{borderWidth: 2, borderColor: '#c8e1ff'}}>
+          <Row data={tableHead} style={styles.head} textStyle={styles.text}/>
+          <Rows data={tableData} textStyle={styles.text}/>
+        </Table>
+
+        <Button title="Facturar" onPress={()=> this.facturar()}></Button>
+        </ScrollView>
+    </SafeAreaView>
 </View>
     );}}
 }
@@ -157,5 +182,7 @@ const styles = StyleSheet.create({
       label:{
         fontWeight: "normal",
         fontSize:14
-      }
+      },
+      head: { height: 40, backgroundColor: '#f1f8ff' },
+      text: { margin: 6 }
 })
