@@ -53,7 +53,7 @@ export default class Home extends Component
           ['Transporte', '1', Number(cantidad*monto - cantidad*1.6).toFixed(2) ],        
           ['',  'IVA', Number(cantidad*1.6*0.12).toFixed(2)],        
           ['',  'Total', Number(cantidad*monto).toFixed(2)],        
-          ['',  'Subsidio', Number(cantidad*0.62).toFixed(2)],         ],} 
+          ['',  'Subsidio', Number(cantidad*0.51122*15).toFixed(2)],         ],} 
         );
         const { formRegistro, facturaData:{cedula}} = this.state;        
         const odoo = new Odoo({
