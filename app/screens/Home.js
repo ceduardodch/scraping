@@ -49,11 +49,11 @@ export default class Home extends Component
     }
     async buscarPersona(cantidad, monto) {
         this.setState({loaded:false, tableData: [
-          ['Gas', cantidad, cantidad*1.6],        
-          ['Transporte', '1', monto - cantidad*1],        
-          ['',  'IVA', cantidad*1.6*0.12],        
-          ['',  'Total', monto],        
-          ['',  'Subsidio', '0.62'],         ],} 
+          ['Gas', cantidad, Number(cantidad*1.6).toFixed(2)],        
+          ['Transporte', '1', Number(cantidad*monto - cantidad*1.6).toFixed(2) ],        
+          ['',  'IVA', Number(cantidad*1.6*0.12).toFixed(2)],        
+          ['',  'Total', Number(cantidad*monto).toFixed(2)],        
+          ['',  'Subsidio', Number(cantidad*0.62).toFixed(2)],         ],} 
         );
         const { formRegistro, facturaData:{cedula}} = this.state;        
         const odoo = new Odoo({

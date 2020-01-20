@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "Scraping",
-    "slug": "scraping",
+    "name": "DisGas",
+    "slug": "DisGas",
     "privacy": "public",
     "sdkVersion": "35.0.0",
     "platforms": [
