@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { StyleSheet, View, Text, SafeAreaView, ScrollView,Alert } from "react-native"
+import { StyleSheet, View, Text, SafeAreaView, ScrollView, Alert } from "react-native"
 import Odoo from 'react-native-odoo-promise-based'
 import * as SQLite from 'expo-sqlite';
 import { Button, Input, Card } from "react-native-elements";
@@ -105,20 +105,24 @@ export default class Home extends Component {
     console.log(facturaValue);
   };
   register_user = () => {
+    console.log("en el guardAR ")
     const {
       formRegistro,
       facturaData
     } = this.state
+    console.log(formRegistro);
+    console.log(facturaData);
     var user_name = formRegistro.names;
     var user_lastname = formRegistro.lastnames;
-    var user_monto= facturaData.monto;
-    var user_cedula= facturaData.cedula;
-    var user_cantidad= facturaData.cantidad;
-    var user_total= Number(user_monto * user_cantidad).toFixed(2)
+    var user_monto = facturaData.monto;
+    var user_cedula = facturaData.cedula;
+    var user_cantidad = facturaData.cantidad;
+    var user_total = Number(user_monto * user_cantidad).toFixed(2)
     db.transaction(function (tx) {
+      console.log("en elasss")
       tx.executeSql(
         'INSERT INTO table_user (user_cedula,user_name,user_lastname,user_monto,user_cantidad,user_total) VALUES (?,?,?,?,?,?)',
-        [user_cedula,user_name, user_lastname,user_monto,user_cantidad,user_total],
+        [user_cedula, user_name, user_lastname, user_monto, user_cantidad, user_total],
         (tx, results) => {
           console.log('Results', results.rowsAffected);
           if (results.rowsAffected > 0) {
@@ -138,7 +142,7 @@ export default class Home extends Component {
             alert('Registration Failed');
           }
         }
-      );
+      )
     });
 
   }

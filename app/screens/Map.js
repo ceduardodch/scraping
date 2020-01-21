@@ -13,10 +13,12 @@ export default class Map extends Component {
         this.view_user();
     }
     async componentDidMount() {
+        console.log("hdhdhdhd");
         this.view_user();
     }
     
     view_user = () => {
+        console.log("DDDDDdd");
         db.transaction(tx => {
             tx.executeSql('SELECT * FROM table_user', [], (tx, results) => {
                 var temp = [];
