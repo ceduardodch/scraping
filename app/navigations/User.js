@@ -25,7 +25,7 @@ const mapScreenStack = createStackNavigator({
   Map: {
     screen: MapScreen,
     navigationOptions: ({ navigation }) => ({
-      title: "Mapa"
+      title: "Resumen"
     })
   }
 });

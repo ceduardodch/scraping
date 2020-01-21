@@ -172,20 +172,18 @@ export default class Home extends Component {
                 onChange={facturaValue => this.onChangeFormFactura(facturaValue)}
               />
 
-
               <Button title="Buscar" onPress={() => this.buscarPersona(this.state.facturaData.cantidad, this.state.facturaData.monto)}></Button>
-              <Card title="DATOS BÁSICOS">
+              <Card title="DATOS BÁSICOS" containerStyle={{marginBottom: 15}}>
                 <Text style={styles.name}>Nombres: <Text style={styles.label}>{this.state.formRegistro.names}</Text></Text>
                 <Text style={styles.name}>Apellidos: <Text style={styles.label}>{this.state.formRegistro.lastnames}</Text></Text>
 
               </Card>
-              <Table borderStyle={{ borderWidth: 2, borderColor: '#c8e1ff' }}>
+              <Table borderStyle={{ borderWidth: 2, borderColor: '#c8e1ff',marginBottom: 15}}>
                 <Row data={tableHead} style={styles.head} textStyle={styles.text} />
                 <Rows data={tableData} textStyle={styles.text} />
               </Table>
-
-              <Button title="Facturar" onPress={() => this.facturar()}></Button>
-              <Button title="Probar" onPress={() => this.register_user()}></Button>
+        
+              <Button style={styles.button} title="Facturar" onPress={() => this.register_user()}></Button>
             </ScrollView>
           </SafeAreaView>
         </View>

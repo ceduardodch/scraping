@@ -16,7 +16,7 @@ export default class Map extends Component {
         console.log("hdhdhdhd");
         this.view_user();
     }
-    
+
     view_user = () => {
         console.log("DDDDDdd");
         db.transaction(tx => {
@@ -33,25 +33,23 @@ export default class Map extends Component {
     }
     ListViewItemSeparator = () => {
         return (
-            <View style={{ height: 0.2, width: '100%', backgroundColor: '#808080' }} />
+            <View style={{ height: 0.3, width: '100%', backgroundColor: '#808080' }} />
         );
     };
     render() {
         return (
-            <View style="styles.viewBody">
-                <Icon
-                    type="material-community"
-                    name="cached"
-                    size={50}
-                    containerStyle={styles.containerIconClose}
-                    onPress={() => this.view_user()}
-                />
+            <View style={styles.viewBody}>
+
                 <FlatList
                     data={this.state.FlatListItems}
                     ItemSeparatorComponent={this.ListViewItemSeparator}
                     keyExtractor={(item, index) => index.toString()}
                     renderItem={({ item }) => (
-                        <View key={item.user_id} style={{ backgroundColor: 'white', padding: 20 }}>
+                        <View key={item.user_id} style={{ backgroundColor: '#f2f2f2', padding: 20,  marginBottom: 10,
+                        marginLeft: 10,
+                        marginTop: 10,
+                        marginRight: 10
+                     }}>
                             <Text>Id: {item.user_id}</Text>
                             <Text>Cédula: {item.user_cedula}</Text>
                             <Text>Nombre: {item.user_name}</Text>
@@ -61,6 +59,13 @@ export default class Map extends Component {
                             <Text>Total: {item.user_total}</Text>
                         </View>
                     )}
+                />
+                <Icon
+                    type="material-community"
+                    name="cached"
+                    size={50}
+                    containerStyle={styles.containerIconClose}
+                    onPress={() => this.view_user()}
                 />
             </View>
         );
@@ -73,7 +78,11 @@ const styles = StyleSheet.create({
         flex: 1,
         alignItems: "center",
         justifyContent: "center",
-        backgroundColor: "#fff"
+        backgroundColor: "White",
+        marginBottom: 10,
+        marginLeft: 10,
+        marginTop: 10,
+        marginRight: 10
     },
     containerIconClose: {
         position: "absolute",
