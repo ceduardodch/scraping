@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { StyleSheet, View, FlatList, Text,Alert } from "react-native"
+import { StyleSheet, View, FlatList, Text, Alert } from "react-native"
 import { Icon } from "react-native-elements";
 import * as SQLite from 'expo-sqlite';
 const db = SQLite.openDatabase("Factura.db");
@@ -12,6 +12,10 @@ export default class Map extends Component {
         };
         this.view_user();
     }
+    async componentDidMount() {
+        this.view_user();
+    }
+    
     view_user = () => {
         db.transaction(tx => {
             tx.executeSql('SELECT * FROM table_user', [], (tx, results) => {
@@ -74,7 +78,7 @@ const styles = StyleSheet.create({
         bottom: 13,
         right: 13,
         backgroundColor: "#fff",
-        borderRadius:25
-      },
-    
+        borderRadius: 25
+    },
+
 })
