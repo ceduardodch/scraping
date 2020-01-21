@@ -10,6 +10,7 @@
   "dependencies": {
     "expo": "^33.0.0",
     "expo-facebook": "~5.0.1",
+    "expo-sqlite": "^8.0.0",
     "firebase": "^7.7.0",
     "react": "16.8.3",
     "react-dom": "^16.8.6",
