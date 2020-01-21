@@ -113,10 +113,12 @@ export default class Home extends Component {
     var user_lastname = formRegistro.lastnames;
     var user_monto= facturaData.monto;
     var user_cedula= facturaData.cedula;
+    var user_cantidad= facturaData.cantidad;
+    var user_total= Number(user_monto * user_cantidad).toFixed(2)
     db.transaction(function (tx) {
       tx.executeSql(
-        'INSERT INTO table_user (user_name, user_lastname) VALUES (?,?)',
-        [user_name, user_lastname],
+        'INSERT INTO table_user (user_cedula,user_name,user_lastname,user_monto,user_cantidad,user_total) VALUES (?,?,?,?,?,?)',
+        [user_cedula,user_name, user_lastname,user_monto,user_cantidad,user_total],
         (tx, results) => {
           console.log('Results', results.rowsAffected);
           if (results.rowsAffected > 0) {
@@ -176,7 +178,7 @@ export default class Home extends Component {
               </Table>
 
               <Button title="Facturar" onPress={() => this.facturar()}></Button>
-              <Button title="Probar" onPress={() => this._guardarSqlLite()}></Button>
+              <Button title="Probar" onPress={() => this.register_user()}></Button>
             </ScrollView>
           </SafeAreaView>
         </View>

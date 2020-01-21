@@ -47,8 +47,12 @@ export default class Map extends Component {
                     renderItem={({ item }) => (
                         <View key={item.user_id} style={{ backgroundColor: 'white', padding: 20 }}>
                             <Text>Id: {item.user_id}</Text>
-                            <Text>Name: {item.user_name}</Text>
-                            <Text>LastName: {item.user_lastname}</Text>
+                            <Text>Cédula: {item.user_cedula}</Text>
+                            <Text>Nombre: {item.user_name}</Text>
+                            <Text>Apellido: {item.user_lastname}</Text>
+                            <Text>Monto: {item.user_monto}</Text>
+                            <Text>Cantidad: {item.user_cantidad}</Text>
+                            <Text>Total: {item.user_total}</Text>
                         </View>
                     )}
                 />
