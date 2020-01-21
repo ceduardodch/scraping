@@ -141,6 +141,9 @@ export default class Home extends Component {
           } else {
             alert('Registration Failed');
           }
+        }, (err) => {
+          console.log("e", err)
+
         }
       )
     });
