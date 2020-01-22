@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import { StyleSheet, View, FlatList, Text, Alert } from "react-native"
 import { Icon } from "react-native-elements";
 import Toast, { DURATION } from "react-native-easy-toast";
+import ActionButton from "react-native-action-button";
 import * as SQLite from 'expo-sqlite';
 const db = SQLite.openDatabase("Factura.db");
 
@@ -18,6 +19,27 @@ export default class Map extends Component {
         this.view_user();
     }
 
+    deleteUser = () => {
+        console.log("eliminar")
+        db.transaction(tx => {
+            tx.executeSql(
+                'DELETE FROM  table_user',
+                [],
+                (tx, results) => {
+                    console.log('Results', results.rowsAffected);
+                    if (results.rowsAffected > 0) {
+                        this.refs.toast.show(
+                            "Información enviada a odoo",
+                            1500
+                        );
+                        this.view_user();
+                    } else {
+                        alert('Error al enviar');
+                    }
+                }
+            );
+        });
+    };
     view_user = (val) => {
         console.log("DDDDDdd");
         db.transaction(tx => {
@@ -68,13 +90,52 @@ export default class Map extends Component {
                         </View>
                     )}
                 />
-                <Icon
-                    type="material-community"
-                    name="cached"
-                    size={50}
-                    containerStyle={styles.containerIconClose}
-                    onPress={() => this.view_user(true)}
-                />
+                {
+                    /*
+                    <Icon
+                     type="material-community"
+                     name="cached"
+                     size={50}
+                     containerStyle={styles.containerIconClose}
+                     onPress={() => this.view_user(true)}
+                      },
+                    BLUE: {
+                    default: "blue",
+                    primary: "#3CA4BF",
+                    secondary: "#007aff",
+                    light: "#8ec4e6",
+                    dark: "#111b1e",
+                    sky: "#4a90e2",      
+                    lightsky:"#87CEFA",
+                    deepsky:"#00BFFF"
+                    },
+
+                 /> */
+                }
+                <ActionButton buttonColor="#3CA4BF">
+                    <ActionButton.Item
+                        buttonColor="#007aff"
+                        title="Actualizar"
+                        onPress={() => this.view_user(true)}
+                    >
+                        <Icon
+                            name="cached"
+                            style={styles.actionButtonIcon}
+                        />
+                    </ActionButton.Item>
+                    <ActionButton.Item
+                        buttonColor="#8ec4e6"
+                        title="Sincronizar"
+                        onPress={() => this.deleteUser()}
+
+                    >
+                        <Icon
+                            name="cloud-upload"
+                            style={styles.actionButtonIcon}
+                        />
+                    </ActionButton.Item>
+
+                </ActionButton>
                 <Toast
                     ref="toast"
                     position="bottom"
@@ -87,6 +148,7 @@ export default class Map extends Component {
             </View>
         );
     }
+
 }
 
 
@@ -107,8 +169,8 @@ const styles = StyleSheet.create({
         right: 13,
         backgroundColor: "#fff",
         borderRadius: 25,
-        borderWidth:2,
-        borderColor:"#f2f2f2"
+        borderWidth: 2,
+        borderColor: "#f2f2f2"
     },
     name: {
         fontWeight: "bold"

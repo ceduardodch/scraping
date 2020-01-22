@@ -28,6 +28,7 @@ export default class Home extends Component {
       formRegistro: {
         names: '',
         lastnames: '',
+        cedula: ''
       },
       tableHead: ['Descripción', 'Cantidad', 'Total'],
       tableData: "",
@@ -44,7 +45,70 @@ export default class Home extends Component {
     };
 
   }
-  async facturar() {
+  async facturar(nombre, cedula) {
+    this.setState({ loaded: false })
+    const odoo = new Odoo({
+      host: 'pruebasproserinfo.far.ec',
+      port: 80, /* Defaults to 80 if not specified */
+      database: 'pruebasproserinfo',
+      username: 'carlos.diaz@fractalsoft.ec', /* Optional if using a stored session_id */
+      password: 'CarlosDiaz2013', /* Optional if using a stored session_id */
+      protocol: 'http' /* Defaults to http if not specified */
+    })
+
+    await odoo.connect()
+      .then(response => { console.log(response); })
+      .catch(e => { console.log(e); })
+
+    const context = {
+      domain: [["id", "=", 1]],
+    }
+    /* Crear partner */
+    await odoo.create('res.partner', {
+      name: nombre,
+      vat: cedula
+    }, context)
+      .then(response => {
+        console.log(response);
+        this.setState({ loaded: true, partner_id: response.data })
+      })
+      .catch(e => { console.log(e); this.setState({ loaded: true }); })
+
+
+    /* Crear factura */
+    console.log("Crear cabecera");
+    await odoo.create('account.invoice', {
+      'partner_id': this.state.partner_id,
+      'type': 'out_invoice'
+    }, context)
+      .then(response => { console.log(response); this.setState({ loaded: true, invoice_id: response.data }) })
+      .catch(e => { console.log(e); this.setState({ loaded: true }); })
+
+    console.log("Traer Invoice");
+    console.log(this.state.partner_id);
+
+
+
+    await odoo.search_read('res.partner', {
+      domain: [["id", "=", this.state.partner_id]]
+    }, context)
+      .then(response => {
+        { console.log(response.data); }
+      })
+      .catch(e => { alert(e) });
+
+    console.log("Creacr lineas");
+
+
+    await odoo.create('account.invoice.line', {
+      'invoice_id': this.state.formRegistro.invoice_id,
+      'name': 'GAS',
+      'product_id': '2',
+      'quantity': '1',
+      'price_unit': '1.6'
+    }, context)
+      .then(response => { console.log(response); this.setState({ loaded: true }) })
+      .catch(e => { console.log(e); this.setState({ loaded: true }); })
 
   }
   async buscarPersona(cantidad, monto) {
@@ -84,9 +148,10 @@ export default class Home extends Component {
           formRegistro: {
             names: response.data[0].names,
             lastnames: response.data[0].lastnames,
+            cedula: response.data[0].identity,
           },
           loaded: true,
-          visible: true,
+          visible: true
         }
         )
       })
@@ -96,6 +161,7 @@ export default class Home extends Component {
           loaded: true,
         })
       });
+
   }
 
   onChangeFormFactura = facturaValue => {
@@ -109,10 +175,15 @@ export default class Home extends Component {
     console.log("confirmacion");
     Alert.alert(
       'Ingreso',
-      'Desea ingresar factura',
+      '¿Desea ingresar factura?',
       [
         {
-          text: 'Ok',
+          text: 'Cancelar',
+          onPress: () => console.log('Cancel Pressed'),
+          style: 'cancel',
+        },
+        {
+          text: 'Aceptar',
           onPress: () => this.register_user()
         }
       ],
@@ -123,6 +194,7 @@ export default class Home extends Component {
 
   register_user = () => {
     console.log("en el guardAR ")
+    var blag=false;
     const {
       formRegistro,
       facturaData,
@@ -136,6 +208,7 @@ export default class Home extends Component {
     var user_transporte = Number(user_cantidad * user_monto - user_cantidad * 1.6).toFixed(2);
     var user_iva = Number(user_cantidad * 1.6 * 0.12).toFixed(2);
     var user_subsidio = Number(user_cantidad * 0.51122 * 15).toFixed(2);
+    console.log("luego en traccasion")
     db.transaction(function (tx) {
       console.log("en elasss")
       tx.executeSql(
@@ -144,11 +217,8 @@ export default class Home extends Component {
         (tx, results) => {
           console.log('Results', results.rowsAffected);
           if (results.rowsAffected > 0) {
-            this.refs.toast.show(
-              "Información actualizada",
-              1500
-            );
-
+            alert('Registro');
+           blag=true;
           } else {
             alert('Registro fallido');
           }
@@ -156,23 +226,25 @@ export default class Home extends Component {
           console.log("e", err)
 
         }
+
       )
     });
-  }
-  closeTable() {
-    console.warn("i made it here")
-    /* this.setState({
-       visible: false
-     })*/
+    if(blag){
+      this.setState({
+        visible:false
+      })
+    }
   }
 
   render() {
-    const { loaded,
+    const {
+      loaded,
       facturaOptions,
       facturaStruct,
       facturaData,
       visible,
-      tableHead, tableData } = this.state
+      tableHead, tableData
+    } = this.state
 
     if (!loaded) {
       return (<PreLoader />);
@@ -180,17 +252,15 @@ export default class Home extends Component {
       return (
 
         <View style={styles.viewBody}>
-          <View>
-            <Toast
-              ref="toast"
-              position="Center"
-              positionValue={320}
-              fadeInDuration={1000}
-              fadeOutDuration={1000}
-              opacity={0.8}
-              textStyle={{ color: "#fff" }}
-            />
-          </View>
+          <Toast
+            ref="toast"
+            position="bottom"
+            positionValue={320}
+            fadeInDuration={1000}
+            fadeOutDuration={1000}
+            opacity={0.8}
+            textStyle={{ color: "#fff" }}
+          />
 
           <ScrollView style={styles.scrollView}>
             <Form
@@ -200,27 +270,33 @@ export default class Home extends Component {
               value={facturaData}
               onChange={facturaValue => this.onChangeFormFactura(facturaValue)}
             />
-
             <Button title="Buscar" onPress={() => this.buscarPersona(this.state.facturaData.cantidad, this.state.facturaData.monto)}></Button>
-            {visible && (
-              <View>
-                <Card title="DATOS BÁSICOS" containerStyle={{ marginBottom: 15 }}>
-                  <Text style={styles.name}>Nombres: <Text style={styles.label}>{this.state.formRegistro.names}</Text></Text>
-                  <Text style={styles.name}>Apellidos: <Text style={styles.label}>{this.state.formRegistro.lastnames}</Text></Text>
-                </Card>
-                <Table borderStyle={{ borderWidth: 2, borderColor: '#c8e1ff', marginBottom: 15 }}>
-                  <Row data={tableHead} style={styles.head} textStyle={styles.text} />
-                  <Rows data={tableData} textStyle={styles.text} />
-                </Table>
-                <Button style={styles.button} title="Facturar" onPress={() => this.confirmationInsert()}></Button>
-              </View>
-            )
-            }
+            {visible && (<View>
+
+              <Card title="DATOS BÁSICOS" containerStyle={{ marginBottom: 15 }}>
+                <Text style={styles.name}>Identificación: <Text style={styles.label}>{this.state.formRegistro.cedula}</Text></Text>
+                <Text style={styles.name}>Nombres: <Text style={styles.label}>{this.state.formRegistro.names}</Text></Text>
+                <Text style={styles.name}>Apellidos: <Text style={styles.label}>{this.state.formRegistro.lastnames}</Text></Text>
+
+              </Card>
+              <Table borderStyle={{ borderWidth: 2, borderColor: '#c8e1ff' }}>
+                <Row data={tableHead} style={styles.head} textStyle={styles.text} />
+                <Rows data={tableData} textStyle={styles.text} />
+              </Table>
+
+              {/*  <Button title="Facturar" onPress={() => this.facturar(this.state.formRegistro.names + ' ' + this.state.formRegistro.lastnames, this.state.formRegistro.cedula)}></Button> */}
+              <Button style={styles.button} title="Facturar" onPress={() => this.confirmationInsert()}></Button>
+            </View>
+            )}
           </ScrollView>
         </View>
       );
     }
   }
+
+
+
+
 }
 
 const styles = StyleSheet.create({
