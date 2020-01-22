@@ -4,8 +4,6 @@ import formValidation from "../utils/Validation";
 import inputTemplate from "./templates/Input"
 
 
-
-
 export  const FacturaStruct = t.struct({
     cedula: formValidation.cedula,
     cantidad: t.Number,
@@ -31,7 +29,7 @@ export const FacturaOptions = {
             config:{
                 placeholder:"Escribe la cantidad",
                 iconType:"material-community",
-                iconName: "battery-unknown"
+                iconName: "google-analytics"
             }
         },        
         monto:{

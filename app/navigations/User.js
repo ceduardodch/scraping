@@ -16,7 +16,7 @@ const homeScreenStack = createStackNavigator({
   Home: {
     screen: HomeScreen,
     navigationOptions: ({ navigation }) => ({
-      title: "Inicio"
+      title: "Facturación"
     })
   }
 });
@@ -57,10 +57,10 @@ const RootStack = createBottomTabNavigator(
     Home: {
       screen: homeScreenStack,
       navigationOptions: ({ navigation }) => ({
-        tabBarLabel: "Inicio",
+        tabBarLabel: "Facturar",
         tabBarIcon: ({ tintColor }) => (
           <Icon
-            name="home"
+            name="file-account"
             type="material-community"
             size={22}
             color={tintColor}
@@ -89,7 +89,7 @@ const RootStack = createBottomTabNavigator(
           tabBarLabel: "Resumen",
           tabBarIcon: ({ tintColor }) => (
             <Icon
-              name="google-maps"
+              name="clipboard-text"
               type="material-community"
               size={22}
               color={tintColor}
