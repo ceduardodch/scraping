@@ -5,7 +5,7 @@ export default class Map extends Component
 {
     render(){return(
 <View style="styles.viewBody">
-    <Text>Map Screen</Text>
+    <Text>Transacciones realizadas</Text>
 </View>
     );}
 }

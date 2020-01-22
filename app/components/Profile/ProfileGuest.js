@@ -18,8 +18,7 @@ export default class ProfileGuest extends Component
     resizeMode="contain"
     />
     <Text style={styles.title}>Consulta tu perfil</Text>
-    <Text style={styles.description}>¿Como describirías el uso de los datos públicos? Crees que 
-    podemos hacer uso de estos datos desde una appcentralizada</Text>
+    <Text style={styles.description}>La forma de fácil de facturar</Text>
     <Button 
         buttonStyle={styles.btnViewProfile} 
         title="Ver tu perfil" 
