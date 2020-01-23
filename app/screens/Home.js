@@ -194,7 +194,7 @@ export default class Home extends Component {
 
   register_user = () => {
     console.log("en el guardAR ")
-    var blag=false;
+    var blag = false;
     const {
       formRegistro,
       facturaData,
@@ -217,8 +217,9 @@ export default class Home extends Component {
         (tx, results) => {
           console.log('Results', results.rowsAffected);
           if (results.rowsAffected > 0) {
+            blag = true;
             alert('Registro');
-           blag=true;
+            
           } else {
             alert('Registro fallido');
           }
@@ -229,9 +230,11 @@ export default class Home extends Component {
 
       )
     });
-    if(blag){
+    console.log("dd" + blag)
+    if (blag) {
+      console.log("dessss")
       this.setState({
-        visible:false
+        visible: false
       })
     }
   }
