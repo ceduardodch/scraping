@@ -9,373 +9,343 @@ import PreLoader from "../components/PreLoader";
 const db = SQLite.openDatabase("Factura.db");
 
 export default class Map extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      FlatListItems: [],
-      partner_id: "",
-      invoice_id: "",
-      loaded: true,
-      product1_id: "",
-      product2_id: "", 
-      partner_flag: false,
-    };
-    this.view_user(false);
-  }
-  async componentDidMount() {
-    console.log("hdhdhdhd");
-    this.view_user();
-  }
-
-  async facturar(user_cedula,user_name,user_lastname,user_monto,user_cantidad,user_total,user_subsidio,user_transporte,user_iva) {
-    try{
-    console.log(user_cedula);
-    console.log(user_name);
-    console.log(user_lastname);
-
-    this.setState({ loaded: false });
-    const odoo = new Odoo({
-      host: "pruebasproserinfo.far.ec",
-      port: 80 /* Defaults to 80 if not specified */,
-      database: "pruebasproserinfo",
-      username:
-        "carlos.diaz@fractalsoft.ec" /* Optional if using a stored session_id */,
-      password: "CarlosDiaz2013" /* Optional if using a stored session_id */,
-      protocol: "http" /* Defaults to http if not specified */
-    });
-
-    await odoo
-      .connect()
-      .then(response => {})
-      .catch(e => {
-        console.log(e);
-      });
-
-    const context = {
-      domain: [["id", "=", 1]]
-    };
-
-    await odoo
-      .search_read(
-        "res.partner",
-        {
-          domain: [["vat", "=", user_cedula]]
-        },
-        context
-      )
-      .then(response => {
-        {
-          console.log(response.data[0].id);
-          this.setState({ loaded: true, partner_id: response.data[0].id });
-        }
-      })
-      .catch(e => {
-        this.setState({ partner_flag: false})});
-        console.log("partner_id ========>"+this.state.partner_id)
-    /* Crear partner */
-        if(this.state.partner_id =="")
-        {
-         await odoo.create('res.partner', {
-          name: user_name +' '+ user_lastname,
-          vat: user_cedula
-        }, context)
-          .then(response => {
-            console.log(response);
-            this.setState({ loaded: true, partner_id: response.data })
-          })
-          .catch(e => { console.log(e); this.setState({ loaded: true }); })
-        }
-
-    /* Crear factura */
-    //console.log(this.state.partner_id);
-    console.log("Crear cabecera");
-    await odoo
-      .create(
-        "account.invoice",
-        {
-          partner_id: this.state.partner_id,
-          type: "out_invoice"
-        },
-        context
-      )
-      .then(response => {
-        console.log(response);
-        this.setState({ loaded: true, invoice_id: response.data });
-      })
-      .catch(e => {
-        console.log(e);
-        this.setState({ loaded: true });
-      });
-
-    console.log("Crear lineas");
-    await odoo
-      .search_read(
-        "product.product",
-        {
-          domain: [["default_code", "=", "01"]]
-        },
-        context
-      )
-      .then(response => {
-        {
-          console.log(response.data[0].id);
-          this.setState({ loaded: true, product1_id: response.data[0].id });
-        }
-      })
-      .catch(e => {
-        alert(e);
-      });
-      console.log("Productos");
-    await odoo
-      .search_read(
-        "product.product",
-        {
-          domain: [["default_code", "=", "02"]]
-        },
-        context
-      )
-      .then(response => {
-        {
-          console.log(response.data[0].id);
-          this.setState({ loaded: true, product2_id: response.data[0].id });
-        }
-      })
-      .catch(e => {
-        alert(e);
-      });
-
-    await odoo
-      .create(
-        "account.invoice.line",
-        {
-          invoice_id: this.state.invoice_id,
-          name: "Gas",
-          account_id: "2154",
-          product_id: this.state.product1_id,
-          quantity: user_cantidad,
-          price_unit: "1.6"
-        },
-        context
-      )
-      .then(response => {
-        console.log(response);
-        this.setState({ loaded: true });
-      })
-      .catch(e => {
-        console.log(e);
-        this.setState({ loaded: true });
-      });
-
-    await odoo
-      .create(
-        "account.invoice.line",
-        {
-          invoice_id: this.state.invoice_id,
-          name: "Transporte",
-          account_id: "2154",
-          product_id: this.state.product2_id,
-          quantity: "1",
-          price_unit: user_transporte
-        },
-        context
-      )
-      .then(response => {
-        console.log(response);
-        this.setState({ loaded: true });
-        this.deleteUser(user_cedula);
-        this.refs.toast.show("Información facturada", 1500);
-      })
-      .catch(e => {
-        console.log(e);
-        this.setState({ loaded: true });
-      });
-    }catch(e){}
-  }
-
-  deleteUser = (cedula) => {
-    console.log("eliminar ==========> "+ cedula);
-    db.transaction(tx => {
-      tx.executeSql("DELETE FROM  table_user where user_cedula = '"+cedula+"'", [], (tx, results) => {
-        console.log("Results ==========>", results.rowsAffected);
-        if (results.rowsAffected > 0) {
-          this.refs.toast.show("Información enviada a odoo", 1500);
-          this.view_user();
-        } else {
-          alert("Error al enviar");
-        }
-      });
-    });
-  };
-  view_user = val => {
-    console.log("DDDDDdd");
-    db.transaction(tx => {
-      tx.executeSql("SELECT * FROM table_user", [], (tx, results) => {
-        var temp = [];
-        for (let i = 0; i < results.rows.length; ++i) {
-          temp.push(results.rows.item(i));
-        }
-        this.setState({
-          FlatListItems: temp
-        });
-        if (val) {
-          this.refs.toast.show("Información actualizada", 1500);
-        }
-      });
-    });
-  };
-
-
-  sincronizar (){
-    console.log("Sincronizar");
-    db.transaction(tx => {
-      tx.executeSql("SELECT * FROM table_user", [], (tx, results1) => {
-        var temp1 = [];
-        for (let i = 0; i < results1.rows.length; ++i) {
-          temp1.push(results1.rows.item(i));
-          //console.log(temp);
-          
-          this.facturar(temp1[0].user_cedula,temp1[0].user_name,temp1[0].user_lastname,temp1[0].user_monto,temp1[0].user_cantidad,temp1[0].user_total,temp1[0].user_subsidio,temp1[0].user_transporte,temp1[0].user_iva)
-          
-          
-        }
-        
-        
-          
-        
-      });
-    });
-  };
-
-
-  ListViewItemSeparator = () => {
-    return (
-      <View
-        style={{ height: 0.3, width: "100%", backgroundColor: "#808080" }}
-      />
-    );
-  };
-  render() {
-    const { loaded } = this.state;
-    if (!loaded) {
-      return <PreLoader />;
-    } else {
-      return (
-        <View style={styles.viewBody}>
-          <FlatList
-            data={this.state.FlatListItems}
-            ItemSeparatorComponent={this.ListViewItemSeparator}
-            keyExtractor={(item, index) => index.toString()}
-            renderItem={({ item }) => (
-              <View
-                key={item.user_id}
-                style={{
-                  backgroundColor: "#f2f2f2",
-                  padding: 20,
-                  marginBottom: 10,
-                  marginLeft: 10,
-                  marginTop: 10,
-                  marginRight: 10
-                }}
-              >
-                <Text style={styles.name}>
-                  Cédula: <Text style={styles.label}>{item.user_cedula}</Text>{" "}
-                </Text>
-                <Text style={styles.name}>
-                  Nombres: <Text style={styles.label}> {item.user_name}</Text>
-                </Text>
-                <Text style={styles.name}>
-                  Apellidos:{" "}
-                  <Text style={styles.label}>{item.user_lastname}</Text>
-                </Text>
-                <Text style={styles.name}>
-                  Iva:<Text style={styles.label}>{item.user_iva} </Text>{" "}
-                </Text>
-                <Text style={styles.name}>
-                  Total:<Text style={styles.label}>{item.user_total} </Text>{" "}
-                </Text>
-                <Text style={styles.name}>
-                  Subsidio:
-                  <Text style={styles.label}>{item.user_subsidio} </Text>{" "}
-                </Text>
-              </View>
-            )}
-          />
-          {/*
-                    <Icon
-                     type="material-community"
-                     name="cached"
-                     size={50}
-                     containerStyle={styles.containerIconClose}
-                     onPress={() => this.view_user(true)}
-                      },
-                    BLUE: {
-                    default: "blue",
-                    primary: "#3CA4BF",
-                    secondary: "#007aff",
-                    light: "#8ec4e6",
-                    dark: "#111b1e",
-                    sky: "#4a90e2",      
-                    lightsky:"#87CEFA",
-                    deepsky:"#00BFFF"
-                    },
-
-                 /> */}
-          <ActionButton buttonColor="#3CA4BF">
-            <ActionButton.Item
-              buttonColor="#007aff"
-              title="Actualizar"
-              onPress={() => this.view_user(true)}
-            >
-              <Icon name="cached" style={styles.actionButtonIcon} />
-            </ActionButton.Item>
-            <ActionButton.Item
-              buttonColor="#8ec4e6"
-              title="Sincronizar"
-              onPress={() => this.sincronizar()}
-            >
-              <Icon name="cloud-upload" style={styles.actionButtonIcon} />
-            </ActionButton.Item>
-          </ActionButton>
-          <Toast
-            ref="toast"
-            position="bottom"
-            positionValue={320}
-            fadeInDuration={1000}
-            fadeOutDuration={1000}
-            opacity={0.8}
-            textStyle={{ color: "#fff" }}
-          />
-        </View>
-      );
+    constructor(props) {
+        super(props);
+        this.state = {
+            FlatListItems: [],
+            partner_id: "",
+            invoice_id: "",
+            loaded: true,
+            product1_id: "",
+            product2_id: "",
+            partner_flag: false,
+        };
+        this.view_user(false);
     }
-  }
+    async componentDidMount() {
+        console.log("hdhdhdhd");
+        this.view_user();
+    }
+
+    async facturar(user_cedula, user_name, user_lastname, user_monto, user_cantidad, user_total, user_subsidio, user_transporte, user_iva) {
+        try {
+            console.log(user_cedula);
+            console.log(user_name);
+            console.log(user_lastname);
+
+            this.setState({ loaded: false });
+            const odoo = new Odoo({
+                host: "pruebasproserinfo.far.ec",
+                port: 80 /* Defaults to 80 if not specified */,
+                database: "pruebasproserinfo",
+                username:
+                    "carlos.diaz@fractalsoft.ec" /* Optional if using a stored session_id */,
+                password: "CarlosDiaz2013" /* Optional if using a stored session_id */,
+                protocol: "http" /* Defaults to http if not specified */
+            });
+
+            await odoo
+                .connect()
+                .then(response => { })
+                .catch(e => {
+                    console.log(e);
+                });
+
+            const context = {
+                domain: [["id", "=", 1]]
+            };
+
+            await odoo
+                .search_read(
+                    "res.partner",
+                    {
+                        domain: [["vat", "=", user_cedula]]
+                    },
+                    context
+                )
+                .then(response => {
+                    {
+                        console.log(response.data[0].id);
+                        this.setState({ loaded: true, partner_id: response.data[0].id });
+                    }
+                })
+                .catch(e => {
+                    this.setState({ partner_flag: false })
+                });
+            console.log("partner_id ========>" + this.state.partner_id)
+            /* Crear partner */
+            if (this.state.partner_id == "") {
+                await odoo.create('res.partner', {
+                    name: user_name + ' ' + user_lastname,
+                    vat: user_cedula
+                }, context)
+                    .then(response => {
+                        console.log(response);
+                        this.setState({ loaded: true, partner_id: response.data })
+                    })
+                    .catch(e => { console.log(e); this.setState({ loaded: true }); })
+            }
+
+            /* Crear factura */
+            //console.log(this.state.partner_id);
+            console.log("Crear cabecera");
+            await odoo
+                .create(
+                    "account.invoice",
+                    {
+                        partner_id: this.state.partner_id,
+                        type: "out_invoice"
+                    },
+                    context
+                )
+                .then(response => {
+                    console.log(response);
+                    this.setState({ loaded: true, invoice_id: response.data });
+                })
+                .catch(e => {
+                    console.log(e);
+                    this.setState({ loaded: true });
+                });
+
+            console.log("Crear lineas");
+            await odoo
+                .search_read(
+                    "product.product",
+                    {
+                        domain: [["default_code", "=", "01"]]
+                    },
+                    context
+                )
+                .then(response => {
+                    {
+                        console.log(response.data[0].id);
+                        this.setState({ loaded: true, product1_id: response.data[0].id });
+                    }
+                })
+                .catch(e => {
+                    alert(e);
+                });
+            console.log("Productos");
+            await odoo
+                .search_read(
+                    "product.product",
+                    {
+                        domain: [["default_code", "=", "02"]]
+                    },
+                    context
+                )
+                .then(response => {
+                    {
+                        console.log(response.data[0].id);
+                        this.setState({ loaded: true, product2_id: response.data[0].id });
+                    }
+                })
+                .catch(e => {
+                    alert(e);
+                });
+
+            await odoo
+                .create(
+                    "account.invoice.line",
+                    {
+                        invoice_id: this.state.invoice_id,
+                        name: "Gas",
+                        account_id: "2154",
+                        product_id: this.state.product1_id,
+                        quantity: user_cantidad,
+                        price_unit: "1.6"
+                    },
+                    context
+                )
+                .then(response => {
+                    console.log(response);
+                    this.setState({ loaded: true });
+                })
+                .catch(e => {
+                    console.log(e);
+                    this.setState({ loaded: true });
+                });
+
+            await odoo
+                .create(
+                    "account.invoice.line",
+                    {
+                        invoice_id: this.state.invoice_id,
+                        name: "Transporte",
+                        account_id: "2154",
+                        product_id: this.state.product2_id,
+                        quantity: "1",
+                        price_unit: user_transporte
+                    },
+                    context
+                )
+                .then(response => {
+                    console.log(response);
+                    this.setState({ loaded: true });
+                    this.deleteUser(user_cedula);
+                    this.refs.toast.show("Información facturada", 1500);
+                })
+                .catch(e => {
+                    console.log(e);
+                    this.setState({ loaded: true });
+                });
+        } catch (e) { }
+    }
+
+    deleteUser = (cedula) => {
+        console.log("eliminar ==========> " + cedula);
+        db.transaction(tx => {
+            tx.executeSql('DELETE FROM  table_user where user_cedula=?', [cedula], (tx, results) => {
+                console.log("Results ==========>", results.rowsAffected);
+                if (results.rowsAffected > 0) {
+                    this.refs.toast.show("Información enviada a odoo", 1500);
+                    this.view_user();
+                } else {
+                    alert("Error al enviar");
+                }
+            });
+        });
+    };
+    view_user = val => {
+        db.transaction(tx => {
+            tx.executeSql("SELECT * FROM table_user", [], (tx, results) => {
+                var temp = [];
+                for (let i = 0; i < results.rows.length; ++i) {
+                    temp.push(results.rows.item(i));
+                }
+                this.setState({
+                    FlatListItems: temp
+                });
+                if (val) {
+                    this.refs.toast.show("Información actualizada", 1500);
+                }
+            });
+        });
+    };
+
+
+    sincronizar() {
+        console.log("Sincronizar");
+        db.transaction(tx => {
+            tx.executeSql("SELECT * FROM table_user", [], (tx, results1) => {
+                var temp1 = [];
+                for (let i = 0; i < results1.rows.length; ++i) {
+                    temp1.push(results1.rows.item(i));
+                    this.facturar(temp1[0].user_cedula, temp1[0].user_name, temp1[0].user_lastname, temp1[0].user_monto, temp1[0].user_cantidad, temp1[0].user_total, temp1[0].user_subsidio, temp1[0].user_transporte, temp1[0].user_iva)
+
+                }
+            });
+        });
+    };
+
+
+    ListViewItemSeparator = () => {
+        return (
+            <View
+                style={{ height: 0.3, width: "100%", backgroundColor: "#808080" }}
+            />
+        );
+    };
+    render() {
+        const { loaded } = this.state;
+        if (!loaded) {
+            return <PreLoader />;
+        } else {
+            return (
+                <View style={styles.viewBody}>
+                    <FlatList
+                        data={this.state.FlatListItems}
+                        ItemSeparatorComponent={this.ListViewItemSeparator}
+                        keyExtractor={(item, index) => index.toString()}
+                        renderItem={({ item }) => (
+                            <View
+                                key={item.user_id}
+                                style={{
+                                    backgroundColor: "#f2f2f2",
+                                    padding: 10,
+                                    marginBottom: 10,
+                                    marginLeft: 10,
+                                    marginTop: 10,
+                                    marginRight: 10
+                                }}
+                            >
+                                <Text style={styles.name}>
+                                    Cédula: <Text style={styles.label}>{item.user_cedula}</Text>{" "}
+                                </Text>
+                                <Text style={styles.name}>
+                                    Nombres: <Text style={styles.label}> {item.user_name}</Text>
+                                </Text>
+                                <Text style={styles.name}>
+                                    Apellidos: <Text style={styles.label}>{item.user_lastname}</Text>
+                                </Text>
+                                <Text style={styles.name}>
+                                    Iva: <Text style={styles.label}>{item.user_iva} </Text>{" "}
+                                </Text>
+                                <Text style={styles.name}>
+                                    Total: <Text style={styles.label}>{item.user_total} </Text>{" "}
+                                </Text>
+                                <Text style={styles.name}>
+                                    Subsidio: <Text style={styles.label}>{item.user_subsidio} </Text>{" "}
+                                </Text>
+                            </View>
+                        )}
+                    />
+                    <ActionButton buttonColor="#3CA4BF">
+                        <ActionButton.Item
+                            buttonColor="#007aff"
+                            title="Actualizar"
+                            onPress={() => this.view_user(true)}
+                        >
+                            <Icon name="cached" style={styles.actionButtonIcon} />
+                        </ActionButton.Item>
+                        <ActionButton.Item
+                            buttonColor="#8ec4e6"
+                            title="Sincronizar"
+                            onPress={() => this.sincronizar()}
+                        >
+                            <Icon name="cloud-upload" style={styles.actionButtonIcon} />
+                        </ActionButton.Item>
+                    </ActionButton>
+                    <Toast
+                        ref="toast"
+                        position="bottom"
+                        positionValue={320}
+                        fadeInDuration={1000}
+                        fadeOutDuration={1000}
+                        opacity={0.8}
+                        textStyle={{ color: "#fff" }}
+                    />
+                </View>
+            );
+        }
+    }
 }
 
 const styles = StyleSheet.create({
-  viewBody: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: "white",
-    marginBottom: 10,
-    marginLeft: 10,
-    marginTop: 10,
-    marginRight: 10
-  },
-  containerIconClose: {
-    position: "absolute",
-    bottom: 13,
-    right: 13,
-    backgroundColor: "#fff",
-    borderRadius: 25,
-    borderWidth: 2,
-    borderColor: "#f2f2f2"
-  },
-  name: {
-    fontWeight: "bold"
-  },
-  label: {
-    fontWeight: "normal",
-    fontSize: 14
-  }
+    viewBody: {
+        flex: 1,
+        alignItems: "center",
+        justifyContent: "center",
+        backgroundColor: "white",
+        marginBottom: 10,
+        marginLeft: 10,
+        marginTop: 10,
+        marginRight: 10
+    },
+    containerIconClose: {
+        position: "absolute",
+        bottom: 13,
+        right: 13,
+        backgroundColor: "#fff",
+        borderRadius: 25,
+        borderWidth: 2,
+        borderColor: "#f2f2f2"
+    },
+    name: {
+        fontWeight: "bold"
+    },
+    label: {
+        fontWeight: "normal",
+        fontSize: 14
+    }
 });
