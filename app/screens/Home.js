@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { StyleSheet, View, Text, SafeAreaView, ScrollView, Alert } from "react-native"
+import { StyleSheet, View, Text, SafeAreaView, ScrollView, Alert , NetInfo , Platform} from "react-native"
 import Odoo from 'react-native-odoo-promise-based'
 import * as SQLite from 'expo-sqlite';
 import { Button, Input, Card } from "react-native-elements";
@@ -45,73 +45,40 @@ export default class Home extends Component {
     };
 
   }
-  async facturar(nombre, cedula) {
-    this.setState({ loaded: false })
-    const odoo = new Odoo({
-      host: 'pruebasproserinfo.far.ec',
-      port: 80, /* Defaults to 80 if not specified */
-      database: 'pruebasproserinfo',
-      username: 'carlos.diaz@fractalsoft.ec', /* Optional if using a stored session_id */
-      password: 'CarlosDiaz2013', /* Optional if using a stored session_id */
-      protocol: 'http' /* Defaults to http if not specified */
-    })
-
-    await odoo.connect()
-      .then(response => { console.log(response); })
-      .catch(e => { console.log(e); })
-
-    const context = {
-      domain: [["id", "=", 1]],
+  CheckConnectivity = () => {
+    // For Android devices
+    if (Platform.OS === "android") {
+      NetInfo.isConnected.fetch().then(isConnected => {
+        if (isConnected) {
+          Alert.alert("You are online!");
+        } else {
+          Alert.alert("You are offline!");
+        }
+      });
+    } else {
+      // For iOS devices
+      NetInfo.isConnected.addEventListener(
+        "connectionChange",
+        this.handleFirstConnectivityChange
+      );
     }
-    /* Crear partner */
-    await odoo.create('res.partner', {
-      name: nombre,
-      vat: cedula
-    }, context)
-      .then(response => {
-        console.log(response);
-        this.setState({ loaded: true, partner_id: response.data })
-      })
-      .catch(e => { console.log(e); this.setState({ loaded: true }); })
+  };
 
+  handleFirstConnectivityChange = isConnected => {
+    NetInfo.isConnected.removeEventListener(
+      "connectionChange",
+      this.handleFirstConnectivityChange
+    );
 
-    /* Crear factura */
-    console.log("Crear cabecera");
-    await odoo.create('account.invoice', {
-      'partner_id': this.state.partner_id,
-      'type': 'out_invoice'
-    }, context)
-      .then(response => { console.log(response); this.setState({ loaded: true, invoice_id: response.data }) })
-      .catch(e => { console.log(e); this.setState({ loaded: true }); })
+    if (isConnected === false) {
+      Alert.alert("You are offline!");
+    } else {
+      Alert.alert("You are online!");
+    }
+  };
 
-    console.log("Traer Invoice");
-    console.log(this.state.partner_id);
-
-
-
-    await odoo.search_read('res.partner', {
-      domain: [["id", "=", this.state.partner_id]]
-    }, context)
-      .then(response => {
-        { console.log(response.data); }
-      })
-      .catch(e => { alert(e) });
-
-    console.log("Creacr lineas");
-
-
-    await odoo.create('account.invoice.line', {
-      'invoice_id': this.state.formRegistro.invoice_id,
-      'name': 'GAS',
-      'product_id': '2',
-      'quantity': '1',
-      'price_unit': '1.6'
-    }, context)
-      .then(response => { console.log(response); this.setState({ loaded: true }) })
-      .catch(e => { console.log(e); this.setState({ loaded: true }); })
-
-  }
   async buscarPersona(cantidad, monto) {
+
     this.setState({
       loaded: false, tableData: [
         ['Gas', cantidad, Number(cantidad * 1.6).toFixed(2)],
@@ -217,9 +184,14 @@ export default class Home extends Component {
         (tx, results) => {
           console.log('Results', results.rowsAffected);
           if (results.rowsAffected > 0) {
+<<<<<<< HEAD
             blag = true;
             alert('Registro');
             
+=======
+            //alert('Registro');
+           blag=true;
+>>>>>>> faf5d528efdccb25d119ffeee3afbbf28144ff93
           } else {
             alert('Registro fallido');
           }
