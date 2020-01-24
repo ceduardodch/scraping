@@ -19,6 +19,9 @@ export default class Map extends Component {
       product1_id: "",
       product2_id: "", 
       partner_flag: false,
+      taxes1_id: [],
+      taxes2_id: [],
+      account_id:""
     };
     this.view_user(false);
   }
@@ -29,18 +32,19 @@ export default class Map extends Component {
 
   async facturar(user_cedula,user_name,user_lastname,user_monto,user_cantidad,user_total,user_subsidio,user_transporte,user_iva) {
     try{
+      user_subtotal = Number(user_transporte)+user_cantidad*1.6
     console.log(user_cedula);
     console.log(user_name);
     console.log(user_lastname);
 
     this.setState({ loaded: false });
     const odoo = new Odoo({
-      host: "pruebasproserinfo.far.ec",
+      host: "alfredos.far.ec",
       port: 80 /* Defaults to 80 if not specified */,
-      database: "pruebasproserinfo",
+      database: "alfredos",
       username:
         "carlos.diaz@fractalsoft.ec" /* Optional if using a stored session_id */,
-      password: "CarlosDiaz2013" /* Optional if using a stored session_id */,
+      password: "1111" /* Optional if using a stored session_id */,
       protocol: "http" /* Defaults to http if not specified */
     });
 
@@ -55,6 +59,24 @@ export default class Map extends Component {
       domain: [["id", "=", 1]]
     };
 
+    await odoo
+    .search_read(
+      "account.account",
+      {
+        domain: [["code", "=", "201020101"]]
+      },
+      context
+    )
+    .then(response => {
+      {
+        console.log(response.data[0].id);
+        this.setState({ account_id :  response.data[0].id});
+      }
+    })
+    .catch(e => {
+      
+    });
+    
     await odoo
       .search_read(
         "res.partner",
@@ -94,7 +116,12 @@ export default class Map extends Component {
         "account.invoice",
         {
           partner_id: this.state.partner_id,
-          type: "out_invoice"
+          type: "out_invoice",
+          total: user_total,   
+          montoiva: user_iva,
+          baseimpgrav: user_cantidad*1.6,
+          baseimponible:user_transporte,
+          subtotal: user_subtotal
         },
         context
       )
@@ -107,6 +134,9 @@ export default class Map extends Component {
         this.setState({ loaded: true });
       });
 
+
+
+
     console.log("Crear lineas");
     await odoo
       .search_read(
@@ -118,13 +148,18 @@ export default class Map extends Component {
       )
       .then(response => {
         {
-          console.log(response.data[0].id);
-          this.setState({ loaded: true, product1_id: response.data[0].id });
+          console.log(response.data[0].taxes_id);
+          this.setState({ loaded: true, product1_id: response.data[0].id , taxes1_id:response.data[0].taxes_id});
         }
       })
       .catch(e => {
         alert(e);
       });
+
+
+      
+     
+
       console.log("Productos");
     await odoo
       .search_read(
@@ -136,12 +171,12 @@ export default class Map extends Component {
       )
       .then(response => {
         {
-          console.log(response.data[0].id);
-          this.setState({ loaded: true, product2_id: response.data[0].id });
+          console.log(response.data[0].taxes_id);
+          this.setState({ loaded: true, product2_id: response.data[0].id , taxes2_id:response.data[0].taxes_id });
         }
       })
       .catch(e => {
-        alert(e);
+        
       });
 
     await odoo
@@ -149,20 +184,21 @@ export default class Map extends Component {
         "account.invoice.line",
         {
           invoice_id: this.state.invoice_id,
-          name: "Gas",
+          name: "[01] GLP DOMÉSTICO 15 KL",
           account_id: "2154",
           product_id: this.state.product1_id,
           quantity: user_cantidad,
-          price_unit: "1.6"
+          price_unit: "1.6",
+          invoice_line_tax_ids: [[6, 0, this.state.taxes1_id]],
         },
         context
       )
       .then(response => {
-        console.log(response);
+        
         this.setState({ loaded: true });
       })
       .catch(e => {
-        console.log(e);
+        
         this.setState({ loaded: true });
       });
 
@@ -171,11 +207,12 @@ export default class Map extends Component {
         "account.invoice.line",
         {
           invoice_id: this.state.invoice_id,
-          name: "Transporte",
+          name: "[02] TRANSPORTE A DOMICILIO",
           account_id: "2154",
           product_id: this.state.product2_id,
           quantity: "1",
-          price_unit: user_transporte
+          price_unit: user_transporte,
+          invoice_line_tax_id:  [[6, 0, this.state.taxes2_id]],
         },
         context
       )
@@ -184,6 +221,26 @@ export default class Map extends Component {
         this.setState({ loaded: true });
         this.deleteUser(user_cedula);
         this.refs.toast.show("Información facturada", 1500);
+      })
+      .catch(e => {
+        console.log(e);
+        this.setState({ loaded: true });
+      });
+      await odoo
+      .create(
+        "account.invoice.tax",
+        {
+          name :"407 12%",
+          invoice_id: this.state.invoice_id,
+          invoice_line_tax_ids: [[6, 0, this.state.taxes1_id]],
+          account_id: this.state.account_id,
+          amount: user_iva
+        },
+        context
+      )
+      .then(response => {
+        console.log(response);
+        this.setState({ loaded: true, invoice_id: response.data });
       })
       .catch(e => {
         console.log(e);
