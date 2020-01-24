@@ -212,6 +212,7 @@ export default class Home extends Component {
       facturaData: facturaValue
     });
     console.log(facturaValue);
+    
   };
 
   confirmationInsert = () => {

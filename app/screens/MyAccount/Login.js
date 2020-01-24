@@ -1,12 +1,12 @@
 import React, { Component } from "react";
-import { StyleSheet, View, Text, ActivityIndicator } from "react-native";
-import { Image, Button,Divider, SocialIcon } from "react-native-elements";
+import { StyleSheet, View, Text, ActivityIndicator, ScrollView } from "react-native";
+import { Image, Button, Divider, SocialIcon } from "react-native-elements";
 import t from "tcomb-form-native";
 import { LoginStruct, LoginOptions } from "../../forms/Login";
 import * as firebase from "firebase";
 import firebaseconfig from "../../utils/FireBase";
 import Toast, { DURATION } from "react-native-easy-toast";
-import {FacebookApi} from "../../utils/Social"
+import { FacebookApi } from "../../utils/Social"
 import * as Facebook from "expo-facebook";
 
 const Form = t.form.Form;
@@ -54,10 +54,10 @@ export default class Map extends Component {
     }
   };
 
-  loginFacebook= async ()=>{
-    const {type, token} = await Facebook.logInWithReadPermissionsAsync(
+  loginFacebook = async () => {
+    const { type, token } = await Facebook.logInWithReadPermissionsAsync(
       FacebookApi.application_id,
-      {permissions:FacebookApi.permissions}
+      { permissions: FacebookApi.permissions }
     );
     console.log(type);
     console.log(token);
@@ -79,7 +79,7 @@ export default class Map extends Component {
       console.log("Erro desconocido, intentelo mas tarde");
     }
   };
-  
+
   onChangeFormLogin = loginValue => {
     this.setState({
       loginData: loginValue
@@ -101,41 +101,45 @@ export default class Map extends Component {
           source={require("../../../assets/hacker-icon.png")}
           containerStylestyle={styles.containerLogo}
           style={styles.logo}
-        /*  PlaceholderContent={<ActivityIndicator />}*/
+          /*  PlaceholderContent={<ActivityIndicator />}*/
           resizeMode="contain"
         />
+        <ScrollView>
+          <View style={styles.viewLogin}>
+            <Form
+              ref="loginForm"
+              type={loginStruct}
+              options={loginOptions}
+              value={loginData}
+              onChange={loginValue => this.onChangeFormLogin(loginValue)}
+            />
+            <Button
+              buttonStyle={styles.buttonLoginContainer}
+              title="Ingresar"
+              onPress={() => this.login()}
+            />
+            <Text style={styles.textRegister}>¿Aún no tienes una cuenta?
+          <Text style={styles.btnRegister}
+                onPress={() => this.props.navigation.navigate("Registration")}> Registrate</Text>
+            </Text>
+            <Text style={styles.loginErrorMessage}>{loginErrorMessage}</Text>
+            <Divider style={styles.divider}></Divider>
+            <SocialIcon title="Iniciar con Facebook" button type="facebook"
+              onPress={() => this.loginFacebook()} />
+            <Toast
+              ref="toast"
+              position="bottom"
+              positionValue={250}
+              fadeInDuration={1000}
+              fadeOutDuration={1000}
+              opacity={0.8}
+              textStyle={{ color: "#fff" }}
+            />
+          </View>
 
-        <View style={styles.viewLogin}>
-          <Form
-            ref="loginForm"
-            type={loginStruct}
-            options={loginOptions}
-            value={loginData}
-            onChange={loginValue => this.onChangeFormLogin(loginValue)}
-          />
-          <Button
-            buttonStyle={styles.buttonLoginContainer}
-            title="Ingresar"
-            onPress={() => this.login()}
-          />
-          <Text style={styles.textRegister}>¿Aún no tienes una cuenta?
-          <Text style={styles.btnRegister} 
-          onPress={()=>this.props.navigation.navigate("Registration")}> Registrate</Text>
-          </Text>
-          <Text style={styles.loginErrorMessage}>{loginErrorMessage}</Text>
-          <Divider style={styles.divider}></Divider>
-          <SocialIcon title="Iniciar con Facebook" button type="facebook"
-          onPress={() => this.loginFacebook()} />
-          <Toast
-            ref="toast"
-            position="bottom"
-            positionValue={250}
-            fadeInDuration={1000}
-            fadeOutDuration={1000}
-            opacity={0.8}
-            textStyle={{ color: "#fff" }}
-          />
-        </View>
+
+        </ScrollView>
+
       </View>
     );
   }
@@ -171,18 +175,18 @@ const styles = StyleSheet.create({
     marginTop: 20,
     marginBottom: 20
   },
-  divider:{
- backgroundColor: "#00a680",
- marginBottom:20
+  divider: {
+    backgroundColor: "#00a680",
+    marginBottom: 20
   },
-  textRegister:{
-    marginTop:15,
-    marginRight:10, 
-    marginLeft:10
+  textRegister: {
+    marginTop: 15,
+    marginRight: 10,
+    marginLeft: 10
   },
-  btnRegister:{
-    color:"#00a680",
-    fontWeight:"bold"
+  btnRegister: {
+    color: "#00a680",
+    fontWeight: "bold"
 
   }
 });

@@ -40,7 +40,7 @@ export const FacturaOptions = {
                 placeholder:"Escribe el subsidio",
                 iconType:"material-community",                
                 iconName:"scale-balance"
-               
+   
             }
         },        
         

@@ -29,6 +29,24 @@ export default class App extends React.Component {
         }
       );
     });
+    db.transaction(function (txn) {
+      txn.executeSql(
+        "SELECT name FROM sqlite_master WHERE type='table' AND name='table_user_datos'",
+        [],
+        function (tx, res) {
+          console.log('itemdatos:', res.rows.length);
+          if (res.rows.length == 0) {
+            txn.executeSql('DROP TABLE IF EXISTS table_user_datos', []);
+            txn.executeSql(
+              'CREATE TABLE IF NOT EXISTS table_user_datos(user_id_datos INTEGER PRIMARY KEY AUTOINCREMENT,user_url_datos VARCHAR(30),user_valor_datos VARCHAR(40), user_subsidio_datos VARCHAR(20))',
+              []
+            );
+          }
+        }, (err) => {
+          console.log("e" + err)
+        }
+      );
+    });
   }
   render() {
 
