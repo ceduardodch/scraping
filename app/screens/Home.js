@@ -176,9 +176,20 @@ export default class Home extends Component {
   updateInfo = () => {
     this.refs.toast.show("Datos modificados", 1500);
   }
+  updateClient = async (name,lastname,cedula)=> {
+    console.log("entr"+name,"h",lastname)
+   this.setState({
+      formRegistro: {
+        names: name,
+        lastnames: lastname,
+        cedula:cedula
+      }
+    }
+    )
+  }
 
 
-  updateUsers = (close, updateInfo,cedula) => {
+  updateUsers = (close, updateInfo, cedula) => {
     console.log("modificar");
     this.setState({
       overlayComponent: (
@@ -186,35 +197,14 @@ export default class Home extends Component {
           isVisibleOverlay={true}
           inputValueOne=""
           inputValueTwo=""
+          inputValueThree=""
           close={close}
           insertData={updateInfo}
           cedula={cedula}
+          updateClient={this.updateClient}
         />)
     });
     console.log("nn")
-
-    /*
-    const { formRegistro: { names, lastnames }, facturaData: { cedula } } = this.state;
-
-    if (names && lastnames) {
-      db.transaction((tx) => {
-        tx.executeSql(
-          'UPDATE table_user set user_name=?, user_lastname=? where user_cedula=?',
-          [names, lastnames, cedula],
-          (tx, results) => {
-            console.log('Results', results.rowsAffected);
-            if (results.rowsAffected > 0) {
-              console.log("modificado")
-            } else {
-              console.log("no se puede modificar");
-            }
-          }
-        );
-      });
-    } else {
-      alert('No existe datos');
-    }
-    */
   }
 
   onChangeFormFactura = facturaValue => {
@@ -334,7 +324,7 @@ export default class Home extends Component {
                 <Text style={styles.name}>Apellidos: <Text style={styles.label}>{this.state.formRegistro.lastnames}</Text></Text>
                 <Text style={styles.name}>Correo: <Text style={styles.label}>{""}</Text></Text>
                 <View style={styles.register}>
-                  <Text style={styles.btnRegister} onPress={() => this.updateUsers(this.close, this.updateInfo,this.state.facturaData.cedula)}>Modificar datos</Text>
+                  <Text style={styles.btnRegister} onPress={() => this.updateUsers(this.close, this.updateInfo, this.state.facturaData.cedula)}>Modificar datos</Text>
                 </View>
 
 

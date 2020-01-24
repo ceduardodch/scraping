@@ -5,6 +5,9 @@ export default (formValidation ={
     password: t.refinement(t.String, value=> {return value.length>=6;}),
     cedula: t.refinement(t.String, value=> {return value.length=10;}),
     cantidad: t.refinement(t.String, value=> {return value > 0;}),
-    monto: t.refinement(t.String, value=> {return value > 1;})
+    monto: t.refinement(t.String, value=> {return value > 1;}),
+    url: t.refinement(t.String,value=>{return /w/.test(value)}),
+    valor: t.refinement(t.String, value=> {return value > 1;}),
+    subsidio: t.refinement(t.String, value=> {return value > 1;}),
 
 });

@@ -22,14 +22,21 @@ export default class UpdateName extends Component {
             inputValueTwo: inputData
         });
     };
+    onChangeInputThree = inputData => {
+        this.setState({
+            inputValueThree: inputData
+        });
+    };
 
 
-    updateClient =  () => {
+    updateClient = () => {
+        console.log("gsgsgs")
         let names = this.state.inputValueOne;
         let lastnames = this.state.inputValueTwo;
-        let cedula= this.state.cedula;
-        if (names && lastnames) {
-            db.transaction((tx) => {
+        let correo= this.state.inputValueThree;
+        let cedula = this.state.cedula;
+        if (names && lastnames && correo) {
+          /*  db.transaction((tx) => {
                 tx.executeSql(
                     'UPDATE table_user set user_name=?, user_lastname=? where user_cedula=?',
                     [names, lastnames, cedula],
@@ -43,11 +50,16 @@ export default class UpdateName extends Component {
                         }
                     }
                 );
-            });
+            });*/
+            
+            this.close();
+            this.state.updateClient(names,lastnames,cedula);
+            this.state.insertData()
+
         } else {
             alert('Ingresar todos los campos');
         }
-        this.close();
+
     }
 
     close = () => {
@@ -62,6 +74,7 @@ export default class UpdateName extends Component {
             isVisibleOverlay,
             inputValueOne,
             inputValueTwo,
+            inputValueThree,
         } = this.state;
 
         return (
@@ -86,6 +99,13 @@ export default class UpdateName extends Component {
                         placeholder="Apellidos"
                         onChangeText={value => this.onChangeInputTwo(value)}
                         value={inputValueTwo}
+                    />
+                     <Input
+                        containerStyle={styles.inputContainer}
+                        placeholder="Correo"
+                        onChangeText={value => this.onChangeInputThree(value)}
+                        keyboardType="email-address"
+                        value={inputValueThree}
                     />
                     <Button
                         buttonStyle={styles.buttonUpdate}
@@ -128,6 +148,7 @@ const styles = StyleSheet.create({
         marginBottom: 10
     },
     buttonUpdate: {
+        marginTop:4,
         backgroundColor: "#00a680"
     },
     containerIconClose: {

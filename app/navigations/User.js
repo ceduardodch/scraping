@@ -113,7 +113,7 @@ const RootStack = createBottomTabNavigator(
         tabBarLabel: "Datos",
         tabBarIcon: ({ tintColor }) => (
           <Icon
-            name="clipboard-text"
+            name="account-convert"
             type="material-community"
             size={22}
             color={tintColor}

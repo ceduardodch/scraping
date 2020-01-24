@@ -262,11 +262,11 @@ export default class Map extends Component {
                                 key={item.user_id}
                                 style={{
                                     backgroundColor: "#f2f2f2",
-                                    padding: 10,
+                                   padding: 15,
                                     marginBottom: 10,
-                                    marginLeft: 10,
+                                    marginLeft: 14,
                                     marginTop: 10,
-                                    marginRight: 10
+                                    marginRight: 14
                                 }}
                             >
                                 <Text style={styles.name}>
@@ -324,8 +324,8 @@ export default class Map extends Component {
 const styles = StyleSheet.create({
     viewBody: {
         flex: 1,
-        alignItems: "center",
-        justifyContent: "center",
+       // alignItems: "center",
+       // justifyContent: "center",
         backgroundColor: "white",
         marginBottom: 10,
         marginLeft: 10,
