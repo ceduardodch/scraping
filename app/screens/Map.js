@@ -48,16 +48,16 @@ export default class Map extends Component {
       protocol: "http" /* Defaults to http if not specified */
     });
 
-    await odoo
-      .connect()
-      .then(response => {})
-      .catch(e => {
-        console.log(e);
-      });
+            await odoo
+                .connect()
+                .then(response => { })
+                .catch(e => {
+                    console.log(e);
+                });
 
-    const context = {
-      domain: [["id", "=", 1]]
-    };
+            const context = {
+                domain: [["id", "=", 1]]
+            };
 
     await odoo
     .search_read(
@@ -249,190 +249,160 @@ export default class Map extends Component {
     }catch(e){}
   }
 
-  deleteUser = (cedula) => {
-    console.log("eliminar ==========> "+ cedula);
-    db.transaction(tx => {
-      tx.executeSql("DELETE FROM  table_user where user_cedula = '"+cedula+"'", [], (tx, results) => {
-        console.log("Results ==========>", results.rowsAffected);
-        if (results.rowsAffected > 0) {
-          this.refs.toast.show("Información enviada a odoo", 1500);
-          this.view_user();
-        } else {
-          alert("Error al enviar");
-        }
-      });
-    });
-  };
-  view_user = val => {
-    console.log("DDDDDdd");
-    db.transaction(tx => {
-      tx.executeSql("SELECT * FROM table_user", [], (tx, results) => {
-        var temp = [];
-        for (let i = 0; i < results.rows.length; ++i) {
-          temp.push(results.rows.item(i));
-        }
-        this.setState({
-          FlatListItems: temp
+    deleteUser = (cedula) => {
+        console.log("eliminar ==========> " + cedula);
+        db.transaction(tx => {
+            tx.executeSql('DELETE FROM  table_user where user_cedula=?', [cedula], (tx, results) => {
+                console.log("Results ==========>", results.rowsAffected);
+                if (results.rowsAffected > 0) {
+                    this.refs.toast.show("Información enviada a odoo", 1500);
+                    this.view_user();
+                } else {
+                    alert("Error al enviar");
+                }
+            });
         });
-        if (val) {
-          this.refs.toast.show("Información actualizada", 1500);
+    };
+    view_user = val => {
+        db.transaction(tx => {
+            tx.executeSql("SELECT * FROM table_user", [], (tx, results) => {
+                var temp = [];
+                for (let i = 0; i < results.rows.length; ++i) {
+                    temp.push(results.rows.item(i));
+                }
+                this.setState({
+                    FlatListItems: temp
+                });
+                if (val) {
+                    this.refs.toast.show("Información actualizada", 1500);
+                }
+            });
+        });
+    };
+
+
+    sincronizar() {
+        console.log("Sincronizar");
+        db.transaction(tx => {
+            tx.executeSql("SELECT * FROM table_user", [], (tx, results1) => {
+                var temp1 = [];
+                for (let i = 0; i < results1.rows.length; ++i) {
+                    temp1.push(results1.rows.item(i));
+                    this.facturar(temp1[0].user_cedula, temp1[0].user_name, temp1[0].user_lastname, temp1[0].user_monto, temp1[0].user_cantidad, temp1[0].user_total, temp1[0].user_subsidio, temp1[0].user_transporte, temp1[0].user_iva)
+
+                }
+            });
+        });
+    };
+
+
+    ListViewItemSeparator = () => {
+        return (
+            <View
+                style={{ height: 0.3, width: "100%", backgroundColor: "#808080" }}
+            />
+        );
+    };
+    render() {
+        const { loaded } = this.state;
+        if (!loaded) {
+            return <PreLoader />;
+        } else {
+            return (
+                <View style={styles.viewBody}>
+                    <FlatList
+                        data={this.state.FlatListItems}
+                        ItemSeparatorComponent={this.ListViewItemSeparator}
+                        keyExtractor={(item, index) => index.toString()}
+                        renderItem={({ item }) => (
+                            <View
+                                key={item.user_id}
+                                style={{
+                                    backgroundColor: "#f2f2f2",
+                                   padding: 15,
+                                    marginBottom: 10,
+                                    marginLeft: 14,
+                                    marginTop: 10,
+                                    marginRight: 14
+                                }}
+                            >
+                                <Text style={styles.name}>
+                                    Cédula: <Text style={styles.label}>{item.user_cedula}</Text>{" "}
+                                </Text>
+                                <Text style={styles.name}>
+                                    Nombres: <Text style={styles.label}> {item.user_name}</Text>
+                                </Text>
+                                <Text style={styles.name}>
+                                    Apellidos: <Text style={styles.label}>{item.user_lastname}</Text>
+                                </Text>
+                                <Text style={styles.name}>
+                                    Iva: <Text style={styles.label}>{item.user_iva} </Text>{" "}
+                                </Text>
+                                <Text style={styles.name}>
+                                    Total: <Text style={styles.label}>{item.user_total} </Text>{" "}
+                                </Text>
+                                <Text style={styles.name}>
+                                    Subsidio: <Text style={styles.label}>{item.user_subsidio} </Text>{" "}
+                                </Text>
+                            </View>
+                        )}
+                    />
+                    <ActionButton buttonColor="#3CA4BF">
+                        <ActionButton.Item
+                            buttonColor="#007aff"
+                            title="Actualizar"
+                            onPress={() => this.view_user(true)}
+                        >
+                            <Icon name="cached" style={styles.actionButtonIcon} />
+                        </ActionButton.Item>
+                        <ActionButton.Item
+                            buttonColor="#8ec4e6"
+                            title="Sincronizar"
+                            onPress={() => this.sincronizar()}
+                        >
+                            <Icon name="cloud-upload" style={styles.actionButtonIcon} />
+                        </ActionButton.Item>
+                    </ActionButton>
+                    <Toast
+                        ref="toast"
+                        position="bottom"
+                        positionValue={320}
+                        fadeInDuration={1000}
+                        fadeOutDuration={1000}
+                        opacity={0.8}
+                        textStyle={{ color: "#fff" }}
+                    />
+                </View>
+            );
         }
-      });
-    });
-  };
-
-
-  sincronizar (){
-    console.log("Sincronizar");
-    db.transaction(tx => {
-      tx.executeSql("SELECT * FROM table_user", [], (tx, results1) => {
-        var temp1 = [];
-        for (let i = 0; i < results1.rows.length; ++i) {
-          temp1.push(results1.rows.item(i));
-          //console.log(temp);
-          
-          this.facturar(temp1[0].user_cedula,temp1[0].user_name,temp1[0].user_lastname,temp1[0].user_monto,temp1[0].user_cantidad,temp1[0].user_total,temp1[0].user_subsidio,temp1[0].user_transporte,temp1[0].user_iva)
-          
-          
-        }
-        
-        
-          
-        
-      });
-    });
-  };
-
-
-  ListViewItemSeparator = () => {
-    return (
-      <View
-        style={{ height: 0.3, width: "100%", backgroundColor: "#808080" }}
-      />
-    );
-  };
-  render() {
-    const { loaded } = this.state;
-    if (!loaded) {
-      return <PreLoader />;
-    } else {
-      return (
-        <View style={styles.viewBody}>
-          <FlatList
-            data={this.state.FlatListItems}
-            ItemSeparatorComponent={this.ListViewItemSeparator}
-            keyExtractor={(item, index) => index.toString()}
-            renderItem={({ item }) => (
-              <View
-                key={item.user_id}
-                style={{
-                  backgroundColor: "#f2f2f2",
-                  padding: 20,
-                  marginBottom: 10,
-                  marginLeft: 10,
-                  marginTop: 10,
-                  marginRight: 10
-                }}
-              >
-                <Text style={styles.name}>
-                  Cédula: <Text style={styles.label}>{item.user_cedula}</Text>{" "}
-                </Text>
-                <Text style={styles.name}>
-                  Nombres: <Text style={styles.label}> {item.user_name}</Text>
-                </Text>
-                <Text style={styles.name}>
-                  Apellidos:{" "}
-                  <Text style={styles.label}>{item.user_lastname}</Text>
-                </Text>
-                <Text style={styles.name}>
-                  Iva:<Text style={styles.label}>{item.user_iva} </Text>{" "}
-                </Text>
-                <Text style={styles.name}>
-                  Total:<Text style={styles.label}>{item.user_total} </Text>{" "}
-                </Text>
-                <Text style={styles.name}>
-                  Subsidio:
-                  <Text style={styles.label}>{item.user_subsidio} </Text>{" "}
-                </Text>
-              </View>
-            )}
-          />
-          {/*
-                    <Icon
-                     type="material-community"
-                     name="cached"
-                     size={50}
-                     containerStyle={styles.containerIconClose}
-                     onPress={() => this.view_user(true)}
-                      },
-                    BLUE: {
-                    default: "blue",
-                    primary: "#3CA4BF",
-                    secondary: "#007aff",
-                    light: "#8ec4e6",
-                    dark: "#111b1e",
-                    sky: "#4a90e2",      
-                    lightsky:"#87CEFA",
-                    deepsky:"#00BFFF"
-                    },
-
-                 /> */}
-          <ActionButton buttonColor="#3CA4BF">
-            <ActionButton.Item
-              buttonColor="#007aff"
-              title="Actualizar"
-              onPress={() => this.view_user(true)}
-            >
-              <Icon name="cached" style={styles.actionButtonIcon} />
-            </ActionButton.Item>
-            <ActionButton.Item
-              buttonColor="#8ec4e6"
-              title="Sincronizar"
-              onPress={() => this.sincronizar()}
-            >
-              <Icon name="cloud-upload" style={styles.actionButtonIcon} />
-            </ActionButton.Item>
-          </ActionButton>
-          <Toast
-            ref="toast"
-            position="bottom"
-            positionValue={320}
-            fadeInDuration={1000}
-            fadeOutDuration={1000}
-            opacity={0.8}
-            textStyle={{ color: "#fff" }}
-          />
-        </View>
-      );
     }
-  }
 }
 
 const styles = StyleSheet.create({
-  viewBody: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: "white",
-    marginBottom: 10,
-    marginLeft: 10,
-    marginTop: 10,
-    marginRight: 10
-  },
-  containerIconClose: {
-    position: "absolute",
-    bottom: 13,
-    right: 13,
-    backgroundColor: "#fff",
-    borderRadius: 25,
-    borderWidth: 2,
-    borderColor: "#f2f2f2"
-  },
-  name: {
-    fontWeight: "bold"
-  },
-  label: {
-    fontWeight: "normal",
-    fontSize: 14
-  }
+    viewBody: {
+        flex: 1,
+       // alignItems: "center",
+       // justifyContent: "center",
+        backgroundColor: "white",
+        marginBottom: 10,
+        marginLeft: 10,
+        marginTop: 10,
+        marginRight: 10
+    },
+    containerIconClose: {
+        position: "absolute",
+        bottom: 13,
+        right: 13,
+        backgroundColor: "#fff",
+        borderRadius: 25,
+        borderWidth: 2,
+        borderColor: "#f2f2f2"
+    },
+    name: {
+        fontWeight: "bold"
+    },
+    label: {
+        fontWeight: "normal",
+        fontSize: 14
+    }
 });

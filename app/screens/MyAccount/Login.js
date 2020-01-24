@@ -101,7 +101,7 @@ export default class Map extends Component {
           source={require("../../../assets/hacker-icon.png")}
           containerStylestyle={styles.containerLogo}
           style={styles.logo}
-          PlaceholderContent={<ActivityIndicator />}
+        /*  PlaceholderContent={<ActivityIndicator />}*/
           resizeMode="contain"
         />
 
