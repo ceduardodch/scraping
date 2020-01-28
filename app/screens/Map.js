@@ -37,16 +37,16 @@ export default class Map extends Component {
       console.log(user_name);
       console.log(user_lastname);
 
-      this.setState({ loaded: false });
-      const odoo = new Odoo({
-        host: "alfredos.far.ec",
-        port: 80 /* Defaults to 80 if not specified */,
-        database: "alfredos",
-        username:
-          "carlos.diaz@fractalsoft.ec" /* Optional if using a stored session_id */,
-        password: "1111" /* Optional if using a stored session_id */,
-        protocol: "http" /* Defaults to http if not specified */
-      });
+    this.setState({ loaded: false });
+    const odoo = new Odoo({
+      host: "pruebasalfredos.far.ec",
+      port: 80 /* Defaults to 80 if not specified */,
+      database: "pruebasalfredos",
+      username:
+        "carlos.diaz@fractalsoft.ec" /* Optional if using a stored session_id */,
+      password: "1111" /* Optional if using a stored session_id */,
+      protocol: "http" /* Defaults to http if not specified */
+    });
 
       await odoo
         .connect()
