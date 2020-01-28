@@ -1,10 +1,11 @@
 import React, { Component } from "react";
-import { StyleSheet, View, Text } from "react-native";
+import { StyleSheet, View, Text, ScrollView } from "react-native";
 import t from "tcomb-form-native";
+import Odoo from 'react-native-odoo-promise-based'
 import { Button } from "react-native-elements";
 import * as firebase from "firebase";
 import firebaseconfig from "../../utils/FireBase"
-import Toast, {DURATION} from 'react-native-easy-toast'
+import Toast, { DURATION } from 'react-native-easy-toast'
 
 const Form = t.form.Form;
 
@@ -18,41 +19,96 @@ export default class Registration extends Component {
       registerOptions: RegisterOptions,
       formData: {
         name: "",
-        email: "",
         password: "",
-        passwordConfirmation: ""
+        url: "",
+        valor: "",
+        subsidio: ""
       },
-      formErrorMessage: ""
+
     };
   }
+/*
+  async buscarUsuario() {
+    console.log("dddddxaz")
+   
+    const odoo = new Odoo({
+      host: "alfredos.far.ec",
+      port: 80 
+      database: "alfredos",
+      username:
+        "carlos.diaz@fractalsoft.ec" 
+      password: "1111" 
+      protocol: "http" 
+    });
+    console.log("fsfsfzaq1")
+    await odoo.connect()
+      .then(response => { console.log(response); })
+      .catch(e => { console.log(e); })
+    const params = {
+      fields: ["login", "password","company_id"],
+    }
+    const context = {
+      domain: [],
+    }
+    await odoo.search_read('res.users', params, context)
+      .then(response => {
+        console.log("entra");
+        console.log(response.data[0])
+        console.log(response.data[1])
+        this.setState({
+          formRegistro: {
+            name: response.data[0].login,
+            lastnames: response.data[0].password, 
+          }
+        }
+      )
+      .catch(e => {
+        alert(e)
+        this.setState({
+          loaded: true,
+        })
+      });
+  }
+}
+  
+*/
 
   register = () => {
-    
-    const { password, passwordConfirmation } = this.state.formData;
+    console.log("en el guardAR ")
+    const {
+      formData
+    } = this.state
+    var user_usuario_datos = formData.name;
+    var user_contrasena_datos = formData.password;
+    var user_url_datos = formData.url;
+    var user_valor_datos = formData.valor;
+    var user_subsidio_datos = formData.subsidio;
+    console.log("luego en traccasion", user_url_datos, "gg", user_valor_datos, "gf", user_subsidio_datos)
+    console.log("gggfrds", user_contrasena_datos, "hdhhdzq1", user_usuario_datos)
 
-    if (password === passwordConfirmation) {
-      const validate = this.refs.registerForm.getValue();
-      if (validate) {
-        this.setState({ formErrorMessage: "" });
-        firebase
-          .auth()
-          .createUserWithEmailAndPassword(validate.email, validate.password)
-          .then(resolve => {
-            this.refs.toast.show('Registro correcto', 200, () => {
-              this.props.navigation.navigate("Profile")
-          });
-          })
-          .catch(err => {
-            this.refs.toast.show('El email ya esta en uso', 1500);
-          });
-      } else {
-        this.setState({ formErrorMessage: "Formulario incorrecto" });
-      }
-    } else {
-      this.setState({ formErrorMessage: "Las contraseñas no son iguales" });
+    db.transaction(function (tx) {
+      console.log("entra")
+      tx.executeSql(
+        'INSERT INTO table_user_datos (user_contrasena_datos,user_usuario_datos,user_url_datos,user_valor_datos,user_subsidio_datos) VALUES (?,?,?,?,?)',
+        [user_contrasena_datos, user_usuario_datos, user_url_datos, user_valor_datos, user_subsidio_datos],
+        (tx, results) => {
+          console.log('Results', results.rowsAffected);
+          if (results.rowsAffected > 0) {
+            console.log("correcto datos")
+          } else {
+            alert('Registro fallido');
+          }
+        }, (err) => {
+          console.log("error", err)
+        }
+      )
+    }, (error) => {
+      console.log("error en la base: " + error)
+    }, (success) => {
+      console.log("Ingreso correcto")
+      this.refs.toast.show("Información ingresada", 1500);
     }
-
-    console.log(this.state.formData);
+    );
   };
 
   onChangeFormRegister = formValue => {
@@ -67,32 +123,34 @@ export default class Registration extends Component {
       registerOptions,
       registerStruct,
       formData,
-      formErrorMessage
+
     } = this.state;
     return (
       <View style={styles.viewBody}>
-        <Form
-          ref="registerForm"
-          type={registerStruct}
-          options={registerOptions}
-          value={formData}
-          onChange={formValue => this.onChangeFormRegister(formValue)}
-        />
-        <Button
-          buttonStyle={styles.buttonRegisterContainer}
-          title="Unirse"
-          onPress={() => this.register()}
-        />
-        <Text style={styles.formErrorMessage}>{formErrorMessage}</Text>
+        <ScrollView style={styles.scrollView}>
+          <Form
+            ref="registerForm"
+            type={registerStruct}
+            options={registerOptions}
+            value={formData}
+            onChange={formValue => this.onChangeFormRegister(formValue)}
+          />
+          <Button
+            buttonStyle={styles.buttonRegisterContainer}
+            title="Unirse"
+            onPress={() => this.buscarUsuario()}
+          />
+        </ScrollView>
+
         <Toast
-                    ref="toast"            
-                    position="bottom"
-                    positionValue={250}
-                    fadeInDuration={1000}
-                    fadeOutDuration={1000}
-                    opacity={0.8}
-                    textStyle={{color:'#fff'}}
-                />
+          ref="toast"
+          position="bottom"
+          positionValue={250}
+          fadeInDuration={1000}
+          fadeOutDuration={1000}
+          opacity={0.8}
+          textStyle={{ color: '#fff' }}
+        />
       </View>
     );
   }

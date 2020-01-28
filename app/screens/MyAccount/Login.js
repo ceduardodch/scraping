@@ -6,8 +6,7 @@ import { LoginStruct, LoginOptions } from "../../forms/Login";
 import * as firebase from "firebase";
 import firebaseconfig from "../../utils/FireBase";
 import Toast, { DURATION } from "react-native-easy-toast";
-import { FacebookApi } from "../../utils/Social"
-import * as Facebook from "expo-facebook";
+import Odoo from "react-native-odoo-promise-based";
 
 const Form = t.form.Form;
 
@@ -18,67 +17,62 @@ export default class Map extends Component {
       loginStruct: LoginStruct,
       loginOptions: LoginOptions,
       loginData: {
-        email: "",
+        url: "",
+        usuario: "",
         password: ""
       },
       loginErrorMessage: ""
     };
   }
-  login = () => {
-    const { password } = this.state.loginData;
 
-    const validate = this.refs.loginForm.getValue();
-    if (validate) {
-      this.setState({ formErrorMessage: "" });
-      firebase
-        .auth()
-        .signInWithEmailAndPassword(validate.email, validate.password)
-        .then(resolve => {
-          this.refs.toast.show("Registro correcto", 100, () => {
-            this.props.navigation.navigate("Profile");
+  async buscarPersonaOdoo() {
+    console.log("dddddxaz")
+    const { password, url, usuario } = this.state.loginData;
+    console.log("p:", password, "u", url, "u", usuario)
+    const odoo = new Odoo({
+      host: "alfredos.far.ec",
+      port: 80 /* Defaults to 80 if not specified */,
+      database: "alfredos",
+      username:
+        "carlos.diaz@fractalsoft.ec" /* Optional if using a stored session_id */,
+      password: "1111" /* Optional if using a stored session_id */,
+      protocol: "http" /* Defaults to http if not specified */
+    });
+    await odoo.connect()
+      .then(response => { console.log(response); })
+      .catch(e => { console.log(e); })
+    const params = {
+      // domain: [["identity", "=", cedula]],
+      fields: ["login", "password", "company_id"],
+    }
+    const context = {
+      domain: [["id", "=", 1]],
+    }
+    await odoo.search_read('res.users', params, context)
+      .then(response => {
+        const arrayMarkers = [];
+        console.log(response.data[0])
+        console.log("otro")
+        console.log(response.data[1])
+        response.data.map((element, i) => {
+          arrayMarkers.push(element)
+        })
+        if (arrayMarkers.length === 0) {
+          this.refs.toast.show("No existe usuario", 1500);
+        } else {
+          console.log("jdjdjd"+arrayMarkers[0].login,"bvc",arrayMarkers[0].password)
+          this.refs.toast.show("Usuario correcto", 100, () => {
+            this.props.navigation.navigate("Datos", {
+              log: arrayMarkers.data[0].login, urlBase: url, pass: arrayMarkers.data[0].password
+            });
           });
-        })
-        .catch(err => {
-          const errorCode = err.code;
-          if (errorCode === "auth/wrong-password") {
-            this.refs.toast.show("Contraseña incorrectos", 1500);
-          }
-          if (errorCode === "auth/user-not-found") {
-            this.refs.toast.show("Usuario no existe", 1500);
-          } else {
-            this.refs.toast.show("Contraseña o email incorrectos", 1500);
-          }
-        });
-    } else {
-      this.refs.toast.show("Contraseña o email incorrectos", 1500);
-    }
-  };
+        }
+      })
+      .catch(e => {
+        alert(e)
+      });
 
-  loginFacebook = async () => {
-    const { type, token } = await Facebook.logInWithReadPermissionsAsync(
-      FacebookApi.application_id,
-      { permissions: FacebookApi.permissions }
-    );
-    console.log(type);
-    console.log(token);
-    if (type == "success") {
-      const credentials = firebase.auth.FacebookAuthProvider.credential(token);
-      firebase
-        .auth()
-        .signInWithCredential(credentials)
-        .then(() => {
-          console.log("Login correcto");
-          this.props.navigation.goBack();
-        })
-        .catch(err => {
-          console.log("Error accediendo con Facebook, intentelo mas tarde");
-        });
-    } else if (type == "cancel") {
-      console.log("Inicio de sesion cancelad");
-    } else {
-      console.log("Erro desconocido, intentelo mas tarde");
-    }
-  };
+  }
 
   onChangeFormLogin = loginValue => {
     this.setState({
@@ -104,7 +98,16 @@ export default class Map extends Component {
           /*  PlaceholderContent={<ActivityIndicator />}*/
           resizeMode="contain"
         />
-        <ScrollView>
+            <Toast
+              ref="toast"
+              position="bottom"
+              positionValue={250}
+              fadeInDuration={1000}
+              fadeOutDuration={1000}
+              opacity={0.8}
+              textStyle={{ color: "#fff" }}
+            />
+        <ScrollView style={styles.scrollView}>
           <View style={styles.viewLogin}>
             <Form
               ref="loginForm"
@@ -116,25 +119,15 @@ export default class Map extends Component {
             <Button
               buttonStyle={styles.buttonLoginContainer}
               title="Ingresar"
-              onPress={() => this.login()}
+              onPress={() => this.buscarPersonaOdoo()}
             />
-            <Text style={styles.textRegister}>¿Aún no tienes una cuenta?
-          <Text style={styles.btnRegister}
-                onPress={() => this.props.navigation.navigate("Registration")}> Registrate</Text>
-            </Text>
-            <Text style={styles.loginErrorMessage}>{loginErrorMessage}</Text>
+            { /* <Text style={styles.textRegister}>¿Aún no tienes una cuenta?
+                 <Text style={styles.btnRegister}
+                   onPress={() => this.props.navigation.navigate("Registration")}> Registrate</Text>
+               </Text> */
+            }
+
             <Divider style={styles.divider}></Divider>
-            <SocialIcon title="Iniciar con Facebook" button type="facebook"
-              onPress={() => this.loginFacebook()} />
-            <Toast
-              ref="toast"
-              position="bottom"
-              positionValue={250}
-              fadeInDuration={1000}
-              fadeOutDuration={1000}
-              opacity={0.8}
-              textStyle={{ color: "#fff" }}
-            />
           </View>
 
 
