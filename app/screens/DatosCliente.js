@@ -32,11 +32,11 @@ export default class DatosCliente extends Component {
   }
   async componentDidMount() {
     const { navigation } = this.props;
-
     this.setState({
+      url: navigation.state.params.urlBase,
       name: navigation.state.params.log,
       password: navigation.state.params.pass,
-      url: navigation.state.params.urlBase,
+  
     }
     )
     this.view_user();
@@ -57,7 +57,7 @@ export default class DatosCliente extends Component {
     console.log("probar",this.state.url)
     console.log("luego en traccasion", user_url_datos, "gg", user_valor_datos, "gf", user_subsidio_datos);
     console.log("con",user_contrasena_datos,"uu",user_usuario_datos)
-    user_usuario_datos="contra"
+    user_contrasena_datos="contra"
     if (user_url_datos && user_valor_datos && user_subsidio_datos) {
       if (this.state.FlatListItems.length === 0) {
         db.transaction(function (tx) {

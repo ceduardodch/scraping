@@ -25,6 +25,39 @@ export default class Map extends Component {
     };
   }
 
+  async buscarPersona() {
+    console.log("buscar")
+    const { password, url, usuario } = this.state.loginData;
+    console.log("sw")
+    db.transaction(tx => {
+      tx.executeSql(
+        'SELECT * FROM table_user_datos where user_contrasena_datos = ? and user_usuario_datos= ? and user_url_datos = ?',
+        [password, usuario, url],
+        (tx, results) => {
+          var len = results.rows.length;
+          console.log('len', len);
+          if (len > 0) {
+            this.refs.toast.show("Usuario correcto", 100, () => {
+              this.props.navigation.navigate("Home");
+            });
+          } else {
+            console.log("no se encuentra")
+            this.buscarOdoo();
+          }
+        }
+      );
+    }, (error) => {
+      console.log("error en la base: " + error);
+    }, (success) => {
+      console.log("correcto");
+    }
+    );
+    console.log("sss")
+  }
+
+  buscarOdoo() {
+    this.buscarPersonaOdoo();
+  }
   async buscarPersonaOdoo() {
     console.log("dddddxaz")
     const { password, url, usuario } = this.state.loginData;
@@ -55,15 +88,17 @@ export default class Map extends Component {
         console.log("otro")
         console.log(response.data[1])
         response.data.map((element, i) => {
-          arrayMarkers.push(element)
+          console.log("hh");
+          console.log(element)
+          arrayMarkers.push(i,element)
         })
         if (arrayMarkers.length === 0) {
           this.refs.toast.show("No existe usuario", 1500);
         } else {
-          console.log("jdjdjd"+arrayMarkers[0].login,"bvc",arrayMarkers[0].password)
+          console.log("jdjdjd" + arrayMarkers[0].login, "bvc", arrayMarkers[0].password)
           this.refs.toast.show("Usuario correcto", 100, () => {
             this.props.navigation.navigate("Datos", {
-              log: arrayMarkers.data[0].login, urlBase: url, pass: arrayMarkers.data[0].password
+              log: arrayMarkers[0].login, urlBase: url, pass: arrayMarkers[0].password
             });
           });
         }
@@ -98,15 +133,15 @@ export default class Map extends Component {
           /*  PlaceholderContent={<ActivityIndicator />}*/
           resizeMode="contain"
         />
-            <Toast
-              ref="toast"
-              position="bottom"
-              positionValue={250}
-              fadeInDuration={1000}
-              fadeOutDuration={1000}
-              opacity={0.8}
-              textStyle={{ color: "#fff" }}
-            />
+        <Toast
+          ref="toast"
+          position="bottom"
+          positionValue={250}
+          fadeInDuration={1000}
+          fadeOutDuration={1000}
+          opacity={0.8}
+          textStyle={{ color: "#fff" }}
+        />
         <ScrollView style={styles.scrollView}>
           <View style={styles.viewLogin}>
             <Form
@@ -119,7 +154,7 @@ export default class Map extends Component {
             <Button
               buttonStyle={styles.buttonLoginContainer}
               title="Ingresar"
-              onPress={() => this.buscarPersonaOdoo()}
+              onPress={() => this.buscarPersona()}
             />
             { /* <Text style={styles.textRegister}>¿Aún no tienes una cuenta?
                  <Text style={styles.btnRegister}
