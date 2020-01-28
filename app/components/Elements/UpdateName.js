@@ -158,7 +158,6 @@ const styles = StyleSheet.create({
     },
     fareTitleText: {
         fontSize: 18,
-        color: "Black",
         textAlign: 'center',
         fontWeight: 'bold',
         marginBottom: 10

@@ -9,8 +9,6 @@ export  const FacturaStruct = t.struct({
     url: formValidation.url,
     valor: t.Number,
     subsidio: t.Number,
-    
-
 });
 
 export const FacturaOptions = {
@@ -28,7 +26,7 @@ export const FacturaOptions = {
             label:"Valor(*)",                        
             template: inputTemplate,
             config:{
-                placeholder:"Escribe la valor",
+                placeholder:"Escribe el valor",
                 iconType:"material-community",
                 iconName: "currency-usd"
             }
