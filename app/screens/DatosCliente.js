@@ -2,7 +2,7 @@ import React, { Component } from "react";
 import { StyleSheet, View, Text, SafeAreaView, ScrollView, Alert, FlatList, TouchableOpacity } from "react-native"
 import Odoo from 'react-native-odoo-promise-based'
 import * as SQLite from 'expo-sqlite';
-import { Button, Input, Card } from "react-native-elements";
+import { Button, Input, Card ,Divider} from "react-native-elements";
 import PreLoader from "../components/PreLoader"
 import { FacturaStruct, FacturaOptions } from "../forms/ConnectClient";
 import t from "tcomb-form-native";
@@ -31,6 +31,9 @@ export default class DatosCliente extends Component {
     };
   }
 
+  async componentDidMount() {
+    this.view_user();
+  }
 
   register_userDatos = () => {
     console.log("en el guardAR ")
@@ -200,7 +203,7 @@ export default class DatosCliente extends Component {
           textStyle={{ color: "#fff" }}
         />
         <ScrollView style={styles.scrollView}>
-          <Text> {this.state.url}</Text>
+          {/*
           <Form
             ref="connectClientForm"
             type={facturaStruct}
@@ -209,12 +212,14 @@ export default class DatosCliente extends Component {
             onChange={facturaValue => this.onChangeFormFactura(facturaValue)}
           />
           <Button style={styles.button} title="Ingresar" onPress={() => this.update_user()}></Button>
+          */}
+
 
           <View style={styles.register}>
             <TouchableOpacity
               onPress={this.view_user}
             >
-              <Text style={styles.btnRegister} >Modificar datos</Text>
+              <Text style={styles.btnRegister} >Ver datos</Text>
             </TouchableOpacity>
           </View>
           <View>
@@ -237,12 +242,15 @@ export default class DatosCliente extends Component {
                   <Text style={styles.name}>
                     URL: <Text style={styles.label}>{item.user_url_datos}</Text>
                   </Text>
+                  <Divider style={styles.divider}></Divider>
                   <Text style={styles.name}>
-                    Valor: <Text style={styles.label}> {item.user_valor_datos}</Text>
+                    VALOR: <Text style={styles.label}> {item.user_valor_datos}</Text>
                   </Text>
+                  <Divider style={styles.divider}></Divider>
                   <Text style={styles.name}>
-                    Subsidio: <Text style={styles.label}>{item.user_subsidio_datos}</Text>
+                    SUBSIDIO: <Text style={styles.label}>{item.user_subsidio_datos}</Text>
                   </Text>
+                  <Divider style={styles.divider}></Divider>
                 </View>
               )}
             />
@@ -310,5 +318,10 @@ const styles = StyleSheet.create({
     fontSize: 14
   },
   head: { height: 40, backgroundColor: '#f1f8ff' },
-  text: { margin: 6 }
+  text: { margin: 6 },
+  divider: {
+    backgroundColor: "#00a680",
+    marginBottom: 20,
+    marginTop:5
+  },
 })

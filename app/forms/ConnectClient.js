@@ -20,7 +20,8 @@ export const FacturaOptions = {
                 placeholder:"Ingrese la URL",
                 iconType:"material-community",
                 iconName:"internet-explorer"
-            }
+            },
+            editable:false,
         },
         valor:{
             label:"Valor(*)",                        
@@ -39,7 +40,8 @@ export const FacturaOptions = {
                 iconType:"material-community",                
                 iconName:"scale-balance"
    
-            }
+            },
+            editable:false,
         },        
         
     }

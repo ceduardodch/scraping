@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { StyleSheet, View, Text, ActivityIndicator, ScrollView } from "react-native";
+import { StyleSheet, View, Text, ActivityIndicator, ScrollView, KeyboardAvoidingView } from "react-native";
 import { Image, Button, Divider, SocialIcon } from "react-native-elements";
 import t from "tcomb-form-native";
 import { LoginStruct, LoginOptions } from "../../forms/Login";
@@ -22,8 +22,21 @@ export default class Map extends Component {
         usuario: "",
         password: ""
       },
-      loginErrorMessage: ""
+      loginErrorMessage: "",
+      existe: false,
     };
+  }
+  async componentDidMount() {
+    db.transaction(tx => {
+      tx.executeSql("SELECT * FROM table_user_datos", [], (tx, results) => {
+        if (results.rows.length) {
+          console.log("Y existe un usuario");
+          this.setState({
+            existe: true
+          })
+        }
+      });
+    });
   }
 
   async buscarPersona() {
@@ -57,7 +70,12 @@ export default class Map extends Component {
   }
 
   buscarOdoo() {
-    this.buscarPersonaOdoo();
+    if (!this.state.existe) {
+      this.buscarPersonaOdoo();
+    } else {
+      this.refs.toast.show("Datos incorrectos");
+    }
+
   }
   async buscarPersonaOdoo() {
     console.log("dddddxaz")
@@ -67,8 +85,7 @@ export default class Map extends Component {
       host: "alfredos.far.ec",
       port: 80,
       database: "alfredos",
-      username:
-        "carlos.diaz@fractalsoft.ec",
+      username: "carlos.diaz@fractalsoft.ec",
       password: "1111",
       protocol: "http"
     });
@@ -76,7 +93,7 @@ export default class Map extends Component {
       .then(response => { console.log(response); })
       .catch(e => { console.log(e); })
     const params = {
-      // domain: [["identity", "=", cedula]],
+      // domain: [["url", "=", url,"password", "=", password,"usuario", "=", usuario ]],
       fields: ["login", "password", "company_id"],
     }
     const context = {
@@ -86,6 +103,7 @@ export default class Map extends Component {
       .then(response => {
         const arrayMarkers = [];
         response.data.map((element, i) => {
+          console.log(element)
           arrayMarkers.push("id:", i, element)
         })
         if (arrayMarkers.length === 0) {
@@ -105,8 +123,8 @@ export default class Map extends Component {
   register_userDatos = (log) => {
     console.log("en el guardAR ", log)
     const { password, url, usuario } = this.state.loginData;
-    var user_valor_datos = "0";
-    var user_subsidio_datos = "0";
+    var user_valor_datos = "1.60";
+    var user_subsidio_datos = "7.66";
     var contra = "contra"
     db.transaction(function (tx) {
       tx.executeSql(
@@ -145,44 +163,48 @@ export default class Map extends Component {
     } = this.state;
 
     return (
-      <View style={styles.viewBody}>
-        <Image
-          source={require("../../../assets/hacker-icon.png")}
-          containerStylestyle={styles.containerLogo}
-          style={styles.logo}
-          resizeMode="contain"
-        />
-        <Toast
-          ref="toast"
-          position="bottom"
-          positionValue={250}
-          fadeInDuration={1000}
-          fadeOutDuration={1000}
-          opacity={0.8}
-          textStyle={{ color: "#fff" }}
-        />
-     
-        <ScrollView style={styles.scrollView}>
+      <KeyboardAvoidingView style={styles.viewBody} behavior="padding" enabled>
+        <View style={styles.viewBody}>
           <View style={styles.viewLogin}>
-            <Form
-              ref="loginForm"
-              type={loginStruct}
-              options={loginOptions}
-              value={loginData}
-              onChange={loginValue => this.onChangeFormLogin(loginValue)}
+            <Image
+              source={require("../../../assets/hacker-icon.png")}
+              containerStylestyle={styles.containerLogo}
+              style={styles.logo}
+              resizeMode="contain"
             />
-            <Button
-              buttonStyle={styles.buttonLoginContainer}
-              title="Ingresar"
-              onPress={() => this.buscarPersona()}
-            />
-            <Divider style={styles.divider}></Divider>
           </View>
 
+          <Toast
+            ref="toast"
+            position="bottom"
+            positionValue={250}
+            fadeInDuration={1000}
+            fadeOutDuration={1000}
+            opacity={0.8}
+            textStyle={{ color: "#fff" }}
+          />
 
-        </ScrollView>
+          <ScrollView style={styles.scrollView}>
+            <View style={styles.viewLogin}>
+              <Form
+                ref="loginForm"
+                type={loginStruct}
+                options={loginOptions}
+                value={loginData}
+                onChange={loginValue => this.onChangeFormLogin(loginValue)}
+              />
+              <Button
+                buttonStyle={styles.buttonLoginContainer}
+                title="Ingresar"
+                onPress={() => this.buscarPersona()}
+              />
+              <Divider style={styles.divider}></Divider>
+            </View>
 
-      </View>
+          </ScrollView>
+
+        </View>
+      </KeyboardAvoidingView>
     );
   }
 }
@@ -192,7 +214,10 @@ const styles = StyleSheet.create({
     flex: 1,
     marginLeft: 30,
     marginRight: 30,
-    marginTop: 30
+    marginTop: 20
+  },
+  viewBodyKeyboar: {
+    flex: 1,
   },
   viewLogin: {
     marginTop: 10
@@ -202,8 +227,8 @@ const styles = StyleSheet.create({
   },
 
   logo: {
-    width: 300,
-    height: 150
+    width: 250,
+    height: 125
   },
   buttonLoginContainer: {
     backgroundColor: "#00a680",
@@ -230,5 +255,11 @@ const styles = StyleSheet.create({
     color: "#00a680",
     fontWeight: "bold"
 
-  }
+  },
+  viewLogin: {
+    marginBottom: 5,
+    marginTop: 2,
+    alignItems: "center",
+  },
+
 });

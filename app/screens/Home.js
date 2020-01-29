@@ -85,7 +85,7 @@ export default class Home extends Component {
       tableData: [
         ['Gas', cantidad, Number(cantidad * 1.6).toFixed(2)],
         ['Transporte', '1', Number(cantidad * monto - cantidad * 1.6).toFixed(2)],
-        ['', 'IVA %', Math.abs(Number(cantidad*1.6- cantidad * 1.6 / 1.12 ).toFixed(2))],
+        ['', 'IVA %', Math.abs(Number(cantidad * 1.6 - cantidad * 1.6 / 1.12).toFixed(2))],
         ['', 'Total', Number(cantidad * monto).toFixed(2)],
         ['', 'Subsidio', Number(cantidad * 0.51122 * 15).toFixed(2)],],
     }
@@ -157,7 +157,7 @@ export default class Home extends Component {
           formRegistro: {
             names: response.data[0].names,
             lastnames: response.data[0].lastnames,
-            cedula: response.data[0].id,
+            cedula: response.data[0].identity,
           },
           loaded: true,
           visible: true
@@ -178,20 +178,20 @@ export default class Home extends Component {
   updateInfo = () => {
     this.refs.toast.show("Datos modificados", 1500);
   }
-  updateClient = async (name,lastname,cedula)=> {
-    console.log("entr"+name,"h",lastname)
-   this.setState({
+  updateClient = async (name, lastname, cedula) => {
+    console.log("entr" + name, "h", lastname)
+    this.setState({
       formRegistro: {
         names: name,
         lastnames: lastname,
-        cedula:cedula
+        cedula: cedula
       }
     }
     )
   }
 
 
-  updateUsers = (close, updateInfo, cedula,name,lastname) => {
+  updateUsers = (close, updateInfo, cedula, name, lastname) => {
     console.log("modificar");
     this.setState({
       overlayComponent: (
@@ -214,7 +214,7 @@ export default class Home extends Component {
       facturaData: facturaValue
     });
     console.log(facturaValue);
-    
+
   };
 
   confirmationInsert = () => {
@@ -251,7 +251,7 @@ export default class Home extends Component {
     var user_cantidad = facturaData.cantidad;
     var user_total = Number(user_monto * user_cantidad).toFixed(2);
     var user_transporte = Number(user_cantidad * user_monto - user_cantidad * 1.6).toFixed(2);
-    var user_iva = Math.abs(Number(cantidad*1.6- cantidad * 1.6 / 1.12 ).toFixed(2))
+    var user_iva = Math.abs(Number(user_cantidad * 1.6 - user_cantidad * 1.6 / 1.12).toFixed(2))
     var user_subsidio = Number(user_cantidad * 0.51122 * 15).toFixed(2);
     console.log("luego en traccasion")
     db.transaction(function (tx) {
@@ -327,7 +327,7 @@ export default class Home extends Component {
                 <Text style={styles.name}>Apellidos: <Text style={styles.label}>{this.state.formRegistro.lastnames}</Text></Text>
                 <Text style={styles.name}>Correo: <Text style={styles.label}>{""}</Text></Text>
                 <View style={styles.register}>
-                  <Text style={styles.btnRegister} onPress={() => this.updateUsers(this.close, this.updateInfo, this.state.facturaData.cedula,this.state.formRegistro.names,this.state.formRegistro.lastnames)}>Modificar datos</Text>
+                  <Text style={styles.btnRegister} onPress={() => this.updateUsers(this.close, this.updateInfo, this.state.facturaData.cedula, this.state.formRegistro.names, this.state.formRegistro.lastnames)}>Modificar datos</Text>
                 </View>
 
 
