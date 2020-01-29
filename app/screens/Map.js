@@ -39,6 +39,15 @@ export default class Map extends Component {
 
     this.setState({ loaded: false });
     const odoo = new Odoo({
+      /*http://pruebasalfredos.far.ec descomponer 
+       protocol : http
+       base: pruebasalfredos
+       host: pruebasalfredos.far.ec
+       username: logea
+       password: logea
+       */
+
+
       host: "pruebasalfredos.far.ec",
       port: 80 /* Defaults to 80 if not specified */,
       database: "pruebasalfredos",

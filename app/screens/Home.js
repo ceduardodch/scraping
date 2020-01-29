@@ -85,7 +85,7 @@ export default class Home extends Component {
       tableData: [
         ['Gas', cantidad, Number(cantidad * 1.6).toFixed(2)],
         ['Transporte', '1', Number(cantidad * monto - cantidad * 1.6).toFixed(2)],
-        ['', 'IVA %', Number(cantidad * 1.6 / 1.12 -1.6).toFixed(2)],
+        ['', 'IVA %', Math.abs(Number(cantidad*1.6- cantidad * 1.6 / 1.12 ).toFixed(2))],
         ['', 'Total', Number(cantidad * monto).toFixed(2)],
         ['', 'Subsidio', Number(cantidad * 0.51122 * 15).toFixed(2)],],
     }
@@ -144,7 +144,7 @@ export default class Home extends Component {
       .catch(e => { console.log(e); })
     const params = {
       domain: [["identity", "=", cedula]],
-      fields: ["names", "lastnames"],
+      fields: ["names", "lastnames", "identity"],
     }
     const context = {
       domain: [["id", "=", 1]],
@@ -249,7 +249,7 @@ export default class Home extends Component {
     var user_cantidad = facturaData.cantidad;
     var user_total = Number(user_monto * user_cantidad).toFixed(2);
     var user_transporte = Number(user_cantidad * user_monto - user_cantidad * 1.6).toFixed(2);
-    var user_iva = Number(user_cantidad * 1.6 /1.12-1.6).toFixed(2);
+    var user_iva = Math.abs(Number(cantidad*1.6- cantidad * 1.6 / 1.12 ).toFixed(2))
     var user_subsidio = Number(user_cantidad * 0.51122 * 15).toFixed(2);
     console.log("luego en traccasion")
     db.transaction(function (tx) {
