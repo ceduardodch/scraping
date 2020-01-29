@@ -161,7 +161,7 @@ export default class Map extends Component {
     } = this.state;
 
     return (
-     // <KeyboardAvoidingView style={styles.viewBodyKeyboar} behavior="padding" enabled>
+      <KeyboardAvoidingView style={styles.viewBodyKeyboar} behavior="padding" enabled>
         <View style={styles.viewBody}>
           <View style={styles.viewLogin}>
             <Image
@@ -182,7 +182,6 @@ export default class Map extends Component {
             textStyle={{ color: "#fff" }}
           />
 
-          <ScrollView style={styles.scrollView}>
             <Form
               ref="loginForm"
               type={loginStruct}
@@ -196,10 +195,10 @@ export default class Map extends Component {
               onPress={() => this.buscarPersona()}
             />
             <Divider style={styles.divider}></Divider>
-          </ScrollView>
+     
 
         </View>
-     // </KeyboardAvoidingView>
+      </KeyboardAvoidingView>
     );
   }
 }
