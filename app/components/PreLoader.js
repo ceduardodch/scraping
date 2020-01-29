@@ -10,7 +10,6 @@ export default class PreLoader extends Component {
     );
   }
 }
-
 const styles = StyleSheet.create(
 {
   preLoaderView:{

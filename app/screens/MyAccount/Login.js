@@ -1,10 +1,8 @@
 import React, { Component } from "react";
-import { StyleSheet, View, Text, ActivityIndicator, ScrollView, KeyboardAvoidingView } from "react-native";
-import { Image, Button, Divider, SocialIcon } from "react-native-elements";
+import { StyleSheet, View, Text, ScrollView, KeyboardAvoidingView } from "react-native";
+import { Image, Button, Divider} from "react-native-elements";
 import t from "tcomb-form-native";
 import { LoginStruct, LoginOptions } from "../../forms/Login";
-import * as firebase from "firebase";
-import firebaseconfig from "../../utils/FireBase";
 import Toast, { DURATION } from "react-native-easy-toast";
 import Odoo from "react-native-odoo-promise-based";
 import * as SQLite from 'expo-sqlite';
@@ -93,7 +91,7 @@ export default class Map extends Component {
       .then(response => { console.log(response); })
       .catch(e => { console.log(e); })
     const params = {
-      // domain: [["url", "=", url,"password", "=", password,"usuario", "=", usuario ]],
+      // domain: [["password", "=", password,"usuario", "=", usuario ]],
       fields: ["login", "password", "company_id"],
     }
     const context = {
@@ -112,7 +110,7 @@ export default class Map extends Component {
           this.refs.toast.show("Usuario correcto", 75, () => {
             this.props.navigation.navigate("Datos");
           });
-          this.register_userDatos(response.data[0].login)
+          this.register_userDatos();
         }
       })
       .catch(e => {
@@ -120,16 +118,16 @@ export default class Map extends Component {
       });
 
   }
-  register_userDatos = (log) => {
-    console.log("en el guardAR ", log)
+  register_userDatos = () => {
+    console.log("en el guardAR ")
     const { password, url, usuario } = this.state.loginData;
     var user_valor_datos = "1.60";
     var user_subsidio_datos = "7.66";
-    var contra = "contra"
+  
     db.transaction(function (tx) {
       tx.executeSql(
         'INSERT INTO table_user_datos (user_contrasena_datos,user_usuario_datos,user_url_datos,user_valor_datos,user_subsidio_datos) VALUES (?,?,?,?,?)',
-        [contra, usuario, url, user_valor_datos, user_subsidio_datos],
+        [password, usuario, url, user_valor_datos, user_subsidio_datos],
         (tx, results) => {
           console.log('Results', results.rowsAffected);
           if (results.rowsAffected > 0) {
@@ -163,7 +161,7 @@ export default class Map extends Component {
     } = this.state;
 
     return (
-      <KeyboardAvoidingView style={styles.viewBody} behavior="padding" enabled>
+     // <KeyboardAvoidingView style={styles.viewBodyKeyboar} behavior="padding" enabled>
         <View style={styles.viewBody}>
           <View style={styles.viewLogin}>
             <Image
@@ -185,26 +183,23 @@ export default class Map extends Component {
           />
 
           <ScrollView style={styles.scrollView}>
-            <View style={styles.viewLogin}>
-              <Form
-                ref="loginForm"
-                type={loginStruct}
-                options={loginOptions}
-                value={loginData}
-                onChange={loginValue => this.onChangeFormLogin(loginValue)}
-              />
-              <Button
-                buttonStyle={styles.buttonLoginContainer}
-                title="Ingresar"
-                onPress={() => this.buscarPersona()}
-              />
-              <Divider style={styles.divider}></Divider>
-            </View>
-
+            <Form
+              ref="loginForm"
+              type={loginStruct}
+              options={loginOptions}
+              value={loginData}
+              onChange={loginValue => this.onChangeFormLogin(loginValue)}
+            />
+            <Button
+              buttonStyle={styles.buttonLoginContainer}
+              title="Ingresar"
+              onPress={() => this.buscarPersona()}
+            />
+            <Divider style={styles.divider}></Divider>
           </ScrollView>
 
         </View>
-      </KeyboardAvoidingView>
+     // </KeyboardAvoidingView>
     );
   }
 }
@@ -218,9 +213,6 @@ const styles = StyleSheet.create({
   },
   viewBodyKeyboar: {
     flex: 1,
-  },
-  viewLogin: {
-    marginTop: 10
   },
   containerLogo: {
     alignItems: "center",
