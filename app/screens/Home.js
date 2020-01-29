@@ -151,11 +151,13 @@ export default class Home extends Component {
     }
     await odoo.search_read('scraping.registro.civil', params, context)
       .then(response => {
+        console.log("d")
+        console.log(response.data[0])
         this.setState({
           formRegistro: {
             names: response.data[0].names,
             lastnames: response.data[0].lastnames,
-            cedula: response.data[0].identity,
+            cedula: response.data[0].id,
           },
           loaded: true,
           visible: true
@@ -189,14 +191,14 @@ export default class Home extends Component {
   }
 
 
-  updateUsers = (close, updateInfo, cedula) => {
+  updateUsers = (close, updateInfo, cedula,name,lastname) => {
     console.log("modificar");
     this.setState({
       overlayComponent: (
         <UpdateName
           isVisibleOverlay={true}
-          inputValueOne=""
-          inputValueTwo=""
+          inputValueOne={name}
+          inputValueTwo={lastname}
           inputValueThree=""
           close={close}
           insertData={updateInfo}
@@ -325,7 +327,7 @@ export default class Home extends Component {
                 <Text style={styles.name}>Apellidos: <Text style={styles.label}>{this.state.formRegistro.lastnames}</Text></Text>
                 <Text style={styles.name}>Correo: <Text style={styles.label}>{""}</Text></Text>
                 <View style={styles.register}>
-                  <Text style={styles.btnRegister} onPress={() => this.updateUsers(this.close, this.updateInfo, this.state.facturaData.cedula)}>Modificar datos</Text>
+                  <Text style={styles.btnRegister} onPress={() => this.updateUsers(this.close, this.updateInfo, this.state.facturaData.cedula,this.state.formRegistro.names,this.state.formRegistro.lastnames)}>Modificar datos</Text>
                 </View>
 
 
