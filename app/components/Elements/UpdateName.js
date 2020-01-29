@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import { StyleSheet, View, Text } from "react-native";
 import { Overlay, Input, Button, Icon } from "react-native-elements";
+import Toast, { DURATION } from "react-native-easy-toast";
 import * as SQLite from 'expo-sqlite';
 const db = SQLite.openDatabase("Factura.db");
 export default class UpdateName extends Component {
@@ -33,31 +34,31 @@ export default class UpdateName extends Component {
         console.log("gsgsgs")
         let names = this.state.inputValueOne;
         let lastnames = this.state.inputValueTwo;
-        let correo= this.state.inputValueThree;
+        let correo = this.state.inputValueThree;
         let cedula = this.state.cedula;
         if (names && lastnames && correo) {
-          /*  db.transaction((tx) => {
-                tx.executeSql(
-                    'UPDATE table_user set user_name=?, user_lastname=? where user_cedula=?',
-                    [names, lastnames, cedula],
-                    (tx, results) => {
-                        console.log('Results', results.rowsAffected);
-                        if (results.rowsAffected > 0) {
-                            console.log("modificado")
-                            this.state.insertData()
-                        } else {
-                            console.log("no se puede modificar");
-                        }
-                    }
-                );
-            });*/
-            
+            /*  db.transaction((tx) => {
+                  tx.executeSql(
+                      'UPDATE table_user set user_name=?, user_lastname=? where user_cedula=?',
+                      [names, lastnames, cedula],
+                      (tx, results) => {
+                          console.log('Results', results.rowsAffected);
+                          if (results.rowsAffected > 0) {
+                              console.log("modificado")
+                              this.state.insertData()
+                          } else {
+                              console.log("no se puede modificar");
+                          }
+                      }
+                  );
+              });*/
+
             this.close();
-            this.state.updateClient(names,lastnames,cedula);
+            this.state.updateClient(names, lastnames, cedula);
             this.state.insertData()
 
         } else {
-            alert('Ingresar todos los campos');
+            this.refs.toast.show("Ingresar todos los campos", 1500);
         }
 
     }
@@ -100,7 +101,7 @@ export default class UpdateName extends Component {
                         onChangeText={value => this.onChangeInputTwo(value)}
                         value={inputValueTwo}
                     />
-                     <Input
+                    <Input
                         containerStyle={styles.inputContainer}
                         placeholder="Correo"
                         onChangeText={value => this.onChangeInputThree(value)}
@@ -119,7 +120,15 @@ export default class UpdateName extends Component {
                         size={40}
                         onPress={() => this.close()}
                     />
-
+                    <Toast
+                        ref="toast"
+                        position="bottom"
+                        positionValue={250}
+                        fadeInDuration={1000}
+                        fadeOutDuration={1000}
+                        opacity={0.8}
+                        textStyle={{ color: "#fff" }}
+                    />
                 </View>
 
             </Overlay>
@@ -148,7 +157,7 @@ const styles = StyleSheet.create({
         marginBottom: 10
     },
     buttonUpdate: {
-        marginTop:4,
+        marginTop: 4,
         backgroundColor: "#00a680"
     },
     containerIconClose: {

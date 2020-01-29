@@ -30,18 +30,7 @@ export default class DatosCliente extends Component {
 
     };
   }
-  async componentDidMount() {
-    const { navigation } = this.props;
 
-    this.setState({
-      name: navigation.state.params.log,
-      password: navigation.state.params.pass,
-      url: navigation.state.params.urlBase,
-    }
-    )
-    this.view_user();
-
-  }
 
   register_userDatos = () => {
     console.log("en el guardAR ")
@@ -54,10 +43,10 @@ export default class DatosCliente extends Component {
     var user_id_datos = 1;
     var user_contrasena_datos = this.state.password;
     var user_usuario_datos = this.state.name;
-    console.log("probar",this.state.url)
+    console.log("probar", this.state.url)
     console.log("luego en traccasion", user_url_datos, "gg", user_valor_datos, "gf", user_subsidio_datos);
-    console.log("con",user_contrasena_datos,"uu",user_usuario_datos)
-    user_usuario_datos="contra"
+    console.log("con", user_contrasena_datos, "uu", user_usuario_datos)
+    user_contrasena_datos = "contra"
     if (user_url_datos && user_valor_datos && user_subsidio_datos) {
       if (this.state.FlatListItems.length === 0) {
         db.transaction(function (tx) {
@@ -128,6 +117,33 @@ export default class DatosCliente extends Component {
         }
         );*/
   };
+  update_user = () => {
+    const {
+      facturaRegistro
+    } = this.state
+    var user_url_datos = facturaRegistro.url;
+    var user_valor_datos = facturaRegistro.valor;
+    var user_subsidio_datos = facturaRegistro.subsidio;
+    var user_id_datos = 1;
+    db.transaction((tx) => {
+      tx.executeSql(
+        'UPDATE table_user_datos set user_valor_datos=?, user_subsidio_datos=? where user_id_datos=?',
+        [user_valor_datos, user_subsidio_datos, user_id_datos],
+        (tx, results) => {
+          console.log('Results', results.rowsAffected);
+          if (results.rowsAffected > 0) {
+            console.log("modificado")
+            this.refs.toast.show("Información ingresada", 1500);
+          } else {
+            console.log("no se puede modificar");
+          }
+        }
+      );
+    });
+  }
+
+
+
   view_user = () => {
     console.log("ddddggggggggg")
     db.transaction(tx => {
@@ -192,7 +208,7 @@ export default class DatosCliente extends Component {
             value={facturaRegistro}
             onChange={facturaValue => this.onChangeFormFactura(facturaValue)}
           />
-          <Button style={styles.button} title="Ingresar" onPress={() => this.register_userDatos()}></Button>
+          <Button style={styles.button} title="Ingresar" onPress={() => this.update_user()}></Button>
 
           <View style={styles.register}>
             <TouchableOpacity
