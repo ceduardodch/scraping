@@ -37,7 +37,7 @@ export default class App extends React.Component {
           console.log('itemdatos:', res.rows.length);
           if (res.rows.length == 0) {
             txn.executeSql('DROP TABLE IF EXISTS table_user_datos', []);
-            txn.executeSql(
+           txn.executeSql(
               'CREATE TABLE IF NOT EXISTS table_user_datos(user_id_datos INTEGER PRIMARY KEY AUTOINCREMENT,user_contrasena_datos VARCHAR(30),user_usuario_datos VARCHAR(30) ,user_url_datos VARCHAR(30),user_valor_datos VARCHAR(40), user_subsidio_datos VARCHAR(20))',
               []
             );

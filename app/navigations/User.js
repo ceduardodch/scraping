@@ -2,7 +2,8 @@ import React from "react";
 import {
   createStackNavigator,
   createAppContainer,
-  createBottomTabNavigator
+  createBottomTabNavigator,
+  createSwitchNavigator,
 } from "react-navigation";
 
 import HomeScreen from "../screens/Home";
@@ -43,22 +44,20 @@ const profileScreenStack = createStackNavigator({
   Profile: {
     screen: ProfileScreen,
     navigationOptions: ({ navigation }) => ({
-      title: "Mi cuenta"
-    })
-  },
-  Registration: {
-    screen: RegistrationScreen,
-    navigationOptions: ({ navigation }) => ({
-      title: "Registro"
+      title: "Mi cuenta",
+    
     })
   },
   Login: {
     screen: LoginScreen,
     navigationOptions: ({ navigation }) => ({
-      title: "Login"
+      title: "Login",
+
     })
   }
 });
+
+
 
 
 const RootStack = createBottomTabNavigator(
@@ -77,7 +76,7 @@ const RootStack = createBottomTabNavigator(
         )
       })
     },
-    Profile: {
+   /* Profile: {
       screen: profileScreenStack,
       navigationOptions: ({ navigation }) => ({
         tabBarLabel: "Mi cuenta",
@@ -90,7 +89,7 @@ const RootStack = createBottomTabNavigator(
           />
         )
       })
-    },
+    },*/
     Mapa: {
       screen: mapScreenStack,
       navigationOptions: ({ navigation }) => ({
@@ -124,7 +123,7 @@ const RootStack = createBottomTabNavigator(
 
   },
   {
-    order: ['Profile', 'Home', 'Mapa', 'Datos'],
+    order: ['Home', 'Mapa', 'Datos'],
     tabBarOptions: {
       inactiveTintColor: "#6464",
       activeTintColor: "#00a680"
@@ -132,5 +131,9 @@ const RootStack = createBottomTabNavigator(
   }
 
 );
+const AppNavigator = createSwitchNavigator({
+  Auth: profileScreenStack,
+  Home: RootStack ,
+});
 
-export default createAppContainer(RootStack);
+export default createAppContainer(AppNavigator);
