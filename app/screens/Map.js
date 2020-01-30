@@ -21,7 +21,10 @@ export default class Map extends Component {
       partner_flag: false,
       taxes1_id: [],
       taxes2_id: [],
-      account_id: ""
+      account_id: "",
+      url:"",
+      user:"",
+      pwd:""
     };
     this.view_user(false);
   }
@@ -36,30 +39,24 @@ export default class Map extends Component {
       console.log(user_cedula);
       console.log(user_name);
       console.log(user_lastname);
+    
 
     this.setState({ loaded: false });
+    prot = this.state.url.split('://');
+    datab = prot[1].split('.');
     const odoo = new Odoo({
-      /*http://pruebasalfredos.far.ec descomponer 
-       protocol : http
-       base: pruebasalfredos
-       host: pruebasalfredos.far.ec
-       username: logea
-       password: logea
-       */
 
-
-      host: "pruebasalfredos.far.ec",
+      host: prot[1],
       port: 80 /* Defaults to 80 if not specified */,
-      database: "pruebasalfredos",
-      username:
-        "carlos.diaz@fractalsoft.ec" /* Optional if using a stored session_id */,
-      password: "1111" /* Optional if using a stored session_id */,
-      protocol: "http" /* Defaults to http if not specified */
+      database: datab[0],
+      username: this.state.user /* Optional if using a stored session_id */,
+      password: this.state.pwd /* Optional if using a stored session_id */,
+      protocol: prot[0]/* Defaults to http if not specified */
     });
 
       await odoo
         .connect()
-        .then(response => { })
+        .then(response => {          console.log(response); })
         .catch(e => {
           console.log(e);
         });
@@ -289,9 +286,30 @@ export default class Map extends Component {
     });
   };
 
+  view_config ()  {
+    db.transaction(tx => {
+      tx.executeSql("SELECT * FROM table_user_datos", [], (tx, results) => {
+        console.log("====> viewconfig1");
+
+        var temp1 = [];
+        for (let i = 0; i < results.rows.length; ++i) {
+          temp1.push(results.rows.item(i));
+          console.log("====> temp ===>"+temp1);
+        this.setState({
+          url: temp1[0].user_url_datos,
+          user: temp1[0].user_usuario_datos,
+          pwd: temp1[0].user_contrasena_datos,
+        
+        });
+      }
+      });
+    });
+  };
+
 
   sincronizar() {
     console.log("Sincronizar");
+    this.view_config();
     db.transaction(tx => {
       tx.executeSql("SELECT * FROM table_user", [], (tx, results1) => {
         var temp1 = [];

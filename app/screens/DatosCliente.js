@@ -166,6 +166,19 @@ export default class DatosCliente extends Component {
 
   };
 
+  deleteUser = () => {
+    db.transaction(tx => {
+      tx.executeSql('DELETE FROM  table_user_datos', (tx, results) => {
+        console.log("Results ==========>", results.rowsAffected);
+        if (results.rowsAffected > 0) {
+          this.refs.toast.show("Datos Borrados", 1500);
+          this.props.navigation.navigate("Login")
+        } else {
+          alert("Error al enviar");
+        }
+      });
+    });
+  };
   onChangeFormFactura = facturaValue => {
 
     this.setState({
@@ -244,6 +257,10 @@ export default class DatosCliente extends Component {
                   </Text>
                   <Divider style={styles.divider}></Divider>
                   <Text style={styles.name}>
+                    Usuario: <Text style={styles.label}>{item.user_usuario_datos}</Text>
+                  </Text>
+                  <Divider style={styles.divider}></Divider>
+                  <Text style={styles.name}>
                     VALOR: <Text style={styles.label}> {item.user_valor_datos}</Text>
                   </Text>
                   <Divider style={styles.divider}></Divider>
@@ -251,6 +268,11 @@ export default class DatosCliente extends Component {
                     SUBSIDIO: <Text style={styles.label}>{item.user_subsidio_datos}</Text>
                   </Text>
                   <Divider style={styles.divider}></Divider>
+                  <Button
+                    buttonStyle={styles.buttonLoginContainer}
+                    title="Salir"
+                    onPress={() => this.deleteUser()}
+            />
                 </View>
               )}
             />

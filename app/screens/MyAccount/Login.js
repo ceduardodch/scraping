@@ -28,6 +28,7 @@ export default class Map extends Component {
     db.transaction(tx => {
       tx.executeSql("SELECT * FROM table_user_datos", [], (tx, results) => {
         if (results.rows.length) {
+          this.props.navigation.navigate("Home");
           console.log("Y existe un usuario");
           this.setState({
             existe: true
@@ -70,7 +71,10 @@ export default class Map extends Component {
   buscarOdoo() {
     if (!this.state.existe) {
       this.buscarPersonaOdoo();
+
     } else {
+      
+
       this.refs.toast.show("Datos incorrectos");
     }
 
@@ -79,21 +83,27 @@ export default class Map extends Component {
     console.log("dddddxaz")
     const { password, url, usuario } = this.state.loginData;
     console.log("p:", password, "u", url, "u", usuario)
+    prot = url.split('://');
+    datab = prot[1].split('.');
+
+    console.log(prot)
     const odoo = new Odoo({
-      host: "alfredos.far.ec",
+      host: prot[1],
       port: 80,
-      database: "alfredos",
-      username: "carlos.diaz@fractalsoft.ec",
-      password: "1111",
-      protocol: "http"
+      database: datab[0],
+      username: usuario,
+      password: password,
+      protocol: prot[0]
     });
     await odoo.connect()
-      .then(response => { console.log(response); })
-      .catch(e => { console.log(e); })
-    const params = {
-      // domain: [["password", "=", password,"usuario", "=", usuario ]],
-      fields: ["login", "password", "company_id"],
-    }
+      .then(response => { console.log(response); 
+        this.refs.toast.show("Usuario correcto", 75, () => {
+          this.props.navigation.navigate("Datos");
+        });
+        this.register_userDatos();
+      })
+      .catch(e => { console.log(e); })    
+    /*
     const context = {
       domain: [["id", "=", 1]],
     }
@@ -116,6 +126,7 @@ export default class Map extends Component {
       .catch(e => {
         alert(e)
       });
+*/
 
   }
   register_userDatos = () => {
