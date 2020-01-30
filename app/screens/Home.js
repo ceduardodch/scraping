@@ -190,8 +190,6 @@ export default class Home extends Component {
     }
     )
   }
-
-
   updateUsers = (close, updateInfo, cedula, name, lastname) => {
     console.log("modificar");
     this.setState({

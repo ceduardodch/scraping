@@ -35,7 +35,7 @@ const DatosClienteScreenStack = createStackNavigator({
   Datos: {
     screen: DatosClienteScreen,
     navigationOptions: ({ navigation }) => ({
-      title: "Ingreso Datos"
+      title: "Datos"
     })
   }
 });
@@ -44,6 +44,7 @@ const profileScreenStack = createStackNavigator({
   Profile: {
     screen: ProfileScreen,
     navigationOptions: ({ navigation }) => ({
+      header: null,
       title: "Mi cuenta",
     
     })

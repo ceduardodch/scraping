@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import { StyleSheet, View, Text, ScrollView, KeyboardAvoidingView } from "react-native";
-import { Image, Button, Divider} from "react-native-elements";
+import { Image, Button, Divider } from "react-native-elements";
 import t from "tcomb-form-native";
 import { LoginStruct, LoginOptions } from "../../forms/Login";
 import Toast, { DURATION } from "react-native-easy-toast";
@@ -73,8 +73,8 @@ export default class Map extends Component {
       this.buscarPersonaOdoo();
 
     } else {
-      
 
+      console.log("datos incorrectos")
       this.refs.toast.show("Datos incorrectos");
     }
 
@@ -96,13 +96,19 @@ export default class Map extends Component {
       protocol: prot[0]
     });
     await odoo.connect()
-      .then(response => { console.log(response); 
-        this.refs.toast.show("Usuario correcto", 75, () => {
-          this.props.navigation.navigate("Datos");
-        });
-        this.register_userDatos();
+      .then(response => {
+        console.log("en este")
+        console.log(response);
+        console.log("g",response.success)
+        if(response.success){
+          this.refs.toast.show("Usuario correcto", 75, () => {
+            this.props.navigation.navigate("Datos");
+          });
+          this.register_userDatos();
+        }
+       
       })
-      .catch(e => { console.log(e); })    
+      .catch(e => { console.log(e); })
     /*
     const context = {
       domain: [["id", "=", 1]],
@@ -134,7 +140,7 @@ export default class Map extends Component {
     const { password, url, usuario } = this.state.loginData;
     var user_valor_datos = "1.60";
     var user_subsidio_datos = "7.66";
-  
+
     db.transaction(function (tx) {
       tx.executeSql(
         'INSERT INTO table_user_datos (user_contrasena_datos,user_usuario_datos,user_url_datos,user_valor_datos,user_subsidio_datos) VALUES (?,?,?,?,?)',
