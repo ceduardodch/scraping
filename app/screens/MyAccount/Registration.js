@@ -3,8 +3,7 @@ import { StyleSheet, View, Text, ScrollView } from "react-native";
 import t from "tcomb-form-native";
 import Odoo from 'react-native-odoo-promise-based'
 import { Button } from "react-native-elements";
-import * as firebase from "firebase";
-import firebaseconfig from "../../utils/FireBase"
+
 import Toast, { DURATION } from 'react-native-easy-toast'
 
 const Form = t.form.Form;

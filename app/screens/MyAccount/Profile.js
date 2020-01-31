@@ -1,7 +1,6 @@
 import React, { Component } from "react";
 import { StyleSheet, View, Text, ActivityIndicator } from "react-native";
 import { Button } from "react-native-elements";
-import * as firebase from "firebase";
 import ProfileGuest from "../../components/Profile/ProfileGuest"
 import ProfileUser from "../../components/Profile/ProfileUser"
 
@@ -30,9 +29,7 @@ export default class Profile extends Component {
     this.props.navigation.navigate(nameScreen);
   };
 
-  logout = () => {
-    firebase.auth().signOut();
-  };
+
 
   render() {
     const { login } = this.state;

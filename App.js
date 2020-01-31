@@ -1,11 +1,10 @@
 import React from "react";
 import { StyleSheet, View } from "react-native";
 import UserNavigation from "./app/navigations/User"
-import firebaseconfig from "./app/utils/FireBase"
-import * as firebase from "firebase"
+
 import * as SQLite from 'expo-sqlite';
 const db = SQLite.openDatabase("Factura.db");
-firebase.initializeApp(firebaseconfig)
+
 export default class App extends React.Component {
   constructor(props) {
     super(props);
