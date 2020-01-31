@@ -69,7 +69,7 @@ export default class Map extends Component {
         .search_read(
           "account.account",
           {
-            domain: [["code", "=", "201020101"]]
+            domain: [["code", "=", "10.01.011"]]
           },
           context
         )
@@ -154,7 +154,7 @@ export default class Map extends Component {
         )
         .then(response => {
           {
-            console.log(response.data[0].taxes_id);
+            console.log(response.data[0]);
             this.setState({ loaded: true, product1_id: response.data[0].id, taxes1_id: response.data[0].taxes_id });
           }
         })
@@ -191,7 +191,7 @@ export default class Map extends Component {
           {
             invoice_id: this.state.invoice_id,
             name: "[01] GLP DOMÉSTICO 15 KL",
-            account_id: "2154",
+            account_id: "563",
             product_id: this.state.product1_id,
             quantity: user_cantidad,
             price_unit: "1.6",
@@ -214,7 +214,7 @@ export default class Map extends Component {
           {
             invoice_id: this.state.invoice_id,
             name: "[02] TRANSPORTE A DOMICILIO",
-            account_id: "2154",
+            account_id: "563",
             product_id: this.state.product2_id,
             quantity: "1",
             price_unit: user_transporte,
