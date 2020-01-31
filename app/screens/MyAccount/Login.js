@@ -102,11 +102,12 @@ export default class Map extends Component {
         console.log("g", response.success)
         if (response.success) {
           console.log("es correcto")
+          this.refs.toast.show("Usuario correcto", 50, () => {
+            this.props.navigation.navigate("Datos");
+          });
+          this.register_userDatos();
         }
-        this.refs.toast.show("Usuario correcto", 50, () => {
-          this.props.navigation.navigate("Datos");
-        });
-        this.register_userDatos();
+      
       })
       .catch(e => { console.log(e); })
     /*
