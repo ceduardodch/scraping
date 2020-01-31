@@ -29,7 +29,6 @@ export default class Map extends Component {
     this.view_user(false);
   }
   async componentDidMount() {
-    console.log("hdhdhdhd");
     this.view_user();
   }
 
@@ -78,7 +77,6 @@ export default class Map extends Component {
           }
         })
         .catch(e => {
-
         });
 
       await odoo
@@ -288,7 +286,6 @@ export default class Map extends Component {
     db.transaction(tx => {
       tx.executeSql("SELECT * FROM table_user_datos", [], (tx, results) => {
         console.log("====> viewconfig1");
-
         var temp1 = [];
         for (let i = 0; i < results.rows.length; ++i) {
           temp1.push(results.rows.item(i));

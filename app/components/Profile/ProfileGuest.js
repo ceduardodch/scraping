@@ -1,11 +1,13 @@
 import React, { Component } from "react";
 import { StyleSheet, View, Text, ActivityIndicator } from "react-native"
 import { Button, Image } from "react-native-elements"
-
+import * as SQLite from 'expo-sqlite';
+const db = SQLite.openDatabase("Factura.db");
 export default class ProfileGuest extends Component {
   constructor(props) {
     super(props);
   }
+
   render() {
     const { goToScreen } = this.props;
     return (

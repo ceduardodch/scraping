@@ -28,7 +28,7 @@ export default class Map extends Component {
     db.transaction(tx => {
       tx.executeSql("SELECT * FROM table_user_datos", [], (tx, results) => {
         if (results.rows.length) {
-          this.props.navigation.navigate("Home");
+          //this.props.navigation.navigate("Home");
           console.log("Y existe un usuario");
           this.setState({
             existe: true
@@ -50,7 +50,7 @@ export default class Map extends Component {
           var len = results.rows.length;
           console.log('len', len);
           if (len > 0) {
-            this.refs.toast.show("Usuario correcto", 100, () => {
+            this.refs.toast.show("Usuario correcto", 50, () => {
               this.props.navigation.navigate("Home");
             });
           } else {
@@ -99,14 +99,14 @@ export default class Map extends Component {
       .then(response => {
         console.log("en este")
         console.log(response);
-        console.log("g",response.success)
-        if(response.success){
-          this.refs.toast.show("Usuario correcto", 75, () => {
-            this.props.navigation.navigate("Datos");
-          });
-          this.register_userDatos();
+        console.log("g", response.success)
+        if (response.success) {
+          console.log("es correcto")
         }
-       
+        this.refs.toast.show("Usuario correcto", 50, () => {
+          this.props.navigation.navigate("Datos");
+        });
+        this.register_userDatos();
       })
       .catch(e => { console.log(e); })
     /*
@@ -180,26 +180,27 @@ export default class Map extends Component {
     return (
       <KeyboardAvoidingView style={styles.viewBodyKeyboar} behavior="padding" enabled>
         <View style={styles.viewBody}>
-          <View style={styles.viewLogin}>
-            <Image
-              source={require("../../../assets/hacker-icon.png")}
-              containerStylestyle={styles.containerLogo}
-              style={styles.logo}
-              resizeMode="contain"
-            />
-          </View>
-
-          <Toast
-            ref="toast"
-            position="bottom"
-            positionValue={250}
-            fadeInDuration={1000}
-            fadeOutDuration={1000}
-            opacity={0.8}
-            textStyle={{ color: "#fff" }}
-          />
-
           <ScrollView style={styles.scrollView}>
+            <View style={styles.viewLogin}>
+              <Image
+                source={require("../../../assets/icon.png")}
+                containerStylestyle={styles.containerLogo}
+                style={styles.logo}
+                resizeMode="contain"
+              />
+            </View>
+
+            <Toast
+              ref="toast"
+              position="bottom"
+              positionValue={250}
+              fadeInDuration={1000}
+              fadeOutDuration={1000}
+              opacity={0.8}
+              textStyle={{ color: "#fff" }}
+            />
+
+
             <Form
               ref="loginForm"
               type={loginStruct}
@@ -212,7 +213,7 @@ export default class Map extends Component {
               title="Ingresar"
               onPress={() => this.buscarPersona()}
             />
-            <Divider style={styles.divider}></Divider>
+
           </ScrollView>
 
         </View>
@@ -267,7 +268,6 @@ const styles = StyleSheet.create({
   },
   viewLogin: {
     marginBottom: 5,
-    marginTop: 2,
     alignItems: "center",
   },
 

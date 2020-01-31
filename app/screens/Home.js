@@ -46,6 +46,7 @@ export default class Home extends Component {
     };
 
   }
+ 
   CheckConnectivity = () => {
     // For Android devices
     if (Platform.OS === "android") {
@@ -87,7 +88,7 @@ export default class Home extends Component {
         ['Transporte', '1', Number(cantidad * monto - cantidad * 1.6).toFixed(2)],
         ['', 'IVA %', Math.abs(Number(cantidad * 1.6 - cantidad * 1.6 / 1.12).toFixed(2))],
         ['', 'Total', Number(cantidad * monto).toFixed(2)],
-        ['', '',''],
+        ['', '', ''],
         ['', 'Subsidio', Number(cantidad * 0.51122 * 15).toFixed(2)],],
     }
     );
@@ -141,7 +142,7 @@ export default class Home extends Component {
       protocol: 'http'
     })
     await odoo.connect()
-      .then(response => { console.log(response); })
+      .then(response => { console.log("conecta"); })
       .catch(e => { console.log(e); })
     const params = {
       domain: [["identity", "=", cedula]],
@@ -153,17 +154,32 @@ export default class Home extends Component {
     await odoo.search_read('scraping.registro.civil', params, context)
       .then(response => {
         console.log("d")
-        console.log(response.data[0])
-        this.setState({
-          formRegistro: {
-            names: response.data[0].names,
-            lastnames: response.data[0].lastnames,
-            cedula: response.data[0].identity,
-          },
-          loaded: true,
-          visible: true
+        console.log(response);
+        console.log("d1")
+        console.log(response.data.length)
+        if (response.data.length > 0) {
+          this.setState({
+            formRegistro: {
+              names: response.data[0].names,
+              lastnames: response.data[0].lastnames,
+              cedula: response.data[0].identity,
+            },
+            loaded: true,
+            visible: true
+          }
+          )
+
+        } else {
+          this.setState({
+            formRegistro: {
+              cedula: cedula,
+            },
+            loaded: true,
+            visible: true
+          }
+          )
+
         }
-        )
       })
       .catch(e => {
         alert(e)
@@ -180,7 +196,6 @@ export default class Home extends Component {
     this.refs.toast.show("Datos modificados", 1500);
   }
   updateClient = async (name, lastname, cedula) => {
-    console.log("entr" + name, "h", lastname)
     this.setState({
       formRegistro: {
         names: name,
@@ -191,7 +206,6 @@ export default class Home extends Component {
     )
   }
   updateUsers = (close, updateInfo, cedula, name, lastname) => {
-    console.log("modificar");
     this.setState({
       overlayComponent: (
         <UpdateName
@@ -205,7 +219,6 @@ export default class Home extends Component {
           updateClient={this.updateClient}
         />)
     });
-    console.log("nn")
   }
 
   onChangeFormFactura = facturaValue => {

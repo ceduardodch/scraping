@@ -208,7 +208,7 @@ export default class DatosCliente extends Component {
       <View style={styles.viewBody}>
         <Toast
           ref="toast"
-          position="bottom"
+          position="center"
           positionValue={320}
           fadeInDuration={1000}
           fadeOutDuration={1000}
