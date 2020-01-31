@@ -24,7 +24,8 @@ export default class Map extends Component {
       account_id: "",
       url: "",
       user: "",
-      pwd: ""
+      pwd: "",
+      user_id:""
     };
     this.view_user(false);
   }
@@ -79,6 +80,24 @@ export default class Map extends Component {
         .catch(e => {
         });
 
+
+        await odoo
+        .search_read(
+          "res.users",
+          {
+            domain: [["login", "=", this.state.username]]
+          },
+          context
+        )
+        .then(response => {
+          {
+            console.log("user_id=====>"+response.data[0].id);
+            this.setState({ user_id: response.data[0].id });
+          }
+        })
+        .catch(e => {
+        });
+
       await odoo
         .search_read(
           "res.partner",
@@ -123,7 +142,8 @@ export default class Map extends Component {
             montoiva: user_iva,
             baseimpgrav: user_cantidad * 1.6,
             baseimponible: user_transporte,
-            subtotal: user_subtotal
+            subtotal: user_subtotal,
+            user_id: this.state.user_id
           },
           context
         )
@@ -187,7 +207,7 @@ export default class Map extends Component {
           {
             invoice_id: this.state.invoice_id,
             name: "[01] GLP DOMÉSTICO 15 KL",
-            account_id: "563",
+            account_id: this.state.account_id,
             product_id: this.state.product1_id,
             quantity: user_cantidad,
             price_unit: "1.6",
@@ -210,7 +230,7 @@ export default class Map extends Component {
           {
             invoice_id: this.state.invoice_id,
             name: "[02] TRANSPORTE A DOMICILIO",
-            account_id: "563",
+            account_id: this.state.account_id,
             product_id: this.state.product2_id,
             quantity: "1",
             price_unit: user_transporte,
