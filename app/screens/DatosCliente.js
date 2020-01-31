@@ -2,7 +2,7 @@ import React, { Component } from "react";
 import { StyleSheet, View, Text, SafeAreaView, ScrollView, Alert, FlatList, TouchableOpacity } from "react-native"
 import Odoo from 'react-native-odoo-promise-based'
 import * as SQLite from 'expo-sqlite';
-import { Button, Input, Card ,Divider} from "react-native-elements";
+import { Button, Input, Card, Divider } from "react-native-elements";
 import PreLoader from "../components/PreLoader"
 import { FacturaStruct, FacturaOptions } from "../forms/ConnectClient";
 import t from "tcomb-form-native";
@@ -167,14 +167,14 @@ export default class DatosCliente extends Component {
   };
 
   deleteUser = () => {
+    console.log("volver")
     db.transaction(tx => {
-      tx.executeSql('DELETE FROM  table_user_datos', (tx, results) => {
+      tx.executeSql('DELETE FROM  table_user_datos',[], (tx, results) => {
         console.log("Results ==========>", results.rowsAffected);
         if (results.rowsAffected > 0) {
-          this.refs.toast.show("Datos Borrados", 1500);
           this.props.navigation.navigate("Login")
         } else {
-          alert("Error al enviar");
+          Console.log("No borra")
         }
       });
     });
@@ -208,7 +208,7 @@ export default class DatosCliente extends Component {
       <View style={styles.viewBody}>
         <Toast
           ref="toast"
-          position="bottom"
+          position="center"
           positionValue={320}
           fadeInDuration={1000}
           fadeOutDuration={1000}
@@ -257,7 +257,7 @@ export default class DatosCliente extends Component {
                   </Text>
                   <Divider style={styles.divider}></Divider>
                   <Text style={styles.name}>
-                    Usuario: <Text style={styles.label}>{item.user_usuario_datos}</Text>
+                    USUARIO: <Text style={styles.label}>{item.user_usuario_datos}</Text>
                   </Text>
                   <Divider style={styles.divider}></Divider>
                   <Text style={styles.name}>
@@ -272,7 +272,7 @@ export default class DatosCliente extends Component {
                     buttonStyle={styles.buttonLoginContainer}
                     title="Salir"
                     onPress={() => this.deleteUser()}
-            />
+                  />
                 </View>
               )}
             />
@@ -344,6 +344,6 @@ const styles = StyleSheet.create({
   divider: {
     backgroundColor: "#00a680",
     marginBottom: 20,
-    marginTop:5
+    marginTop: 5
   },
 })

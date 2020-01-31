@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import { StyleSheet, View, Text, ScrollView, KeyboardAvoidingView } from "react-native";
-import { Image, Button, Divider} from "react-native-elements";
+import { Image, Button, Divider } from "react-native-elements";
 import t from "tcomb-form-native";
 import { LoginStruct, LoginOptions } from "../../forms/Login";
 import Toast, { DURATION } from "react-native-easy-toast";
@@ -28,7 +28,7 @@ export default class Map extends Component {
     db.transaction(tx => {
       tx.executeSql("SELECT * FROM table_user_datos", [], (tx, results) => {
         if (results.rows.length) {
-          this.props.navigation.navigate("Home");
+          //this.props.navigation.navigate("Home");
           console.log("Y existe un usuario");
           this.setState({
             existe: true
@@ -50,7 +50,7 @@ export default class Map extends Component {
           var len = results.rows.length;
           console.log('len', len);
           if (len > 0) {
-            this.refs.toast.show("Usuario correcto", 100, () => {
+            this.refs.toast.show("Usuario correcto", 50, () => {
               this.props.navigation.navigate("Home");
             });
           } else {
@@ -73,8 +73,8 @@ export default class Map extends Component {
       this.buscarPersonaOdoo();
 
     } else {
-      
 
+      console.log("datos incorrectos")
       this.refs.toast.show("Datos incorrectos");
     }
 
@@ -96,13 +96,19 @@ export default class Map extends Component {
       protocol: prot[0]
     });
     await odoo.connect()
-      .then(response => { console.log(response); 
-        this.refs.toast.show("Usuario correcto", 75, () => {
+      .then(response => {
+        console.log("en este")
+        console.log(response);
+        console.log("g", response.success)
+        if (response.success) {
+          console.log("es correcto")
+        }
+        this.refs.toast.show("Usuario correcto", 50, () => {
           this.props.navigation.navigate("Datos");
         });
         this.register_userDatos();
       })
-      .catch(e => { console.log(e); })    
+      .catch(e => { console.log(e); })
     /*
     const context = {
       domain: [["id", "=", 1]],
@@ -134,7 +140,7 @@ export default class Map extends Component {
     const { password, url, usuario } = this.state.loginData;
     var user_valor_datos = "1.60";
     var user_subsidio_datos = "7.66";
-  
+
     db.transaction(function (tx) {
       tx.executeSql(
         'INSERT INTO table_user_datos (user_contrasena_datos,user_usuario_datos,user_url_datos,user_valor_datos,user_subsidio_datos) VALUES (?,?,?,?,?)',
@@ -174,26 +180,27 @@ export default class Map extends Component {
     return (
       <KeyboardAvoidingView style={styles.viewBodyKeyboar} behavior="padding" enabled>
         <View style={styles.viewBody}>
-          <View style={styles.viewLogin}>
-            <Image
-              source={require("../../../assets/hacker-icon.png")}
-              containerStylestyle={styles.containerLogo}
-              style={styles.logo}
-              resizeMode="contain"
-            />
-          </View>
-
-          <Toast
-            ref="toast"
-            position="bottom"
-            positionValue={250}
-            fadeInDuration={1000}
-            fadeOutDuration={1000}
-            opacity={0.8}
-            textStyle={{ color: "#fff" }}
-          />
-
           <ScrollView style={styles.scrollView}>
+            <View style={styles.viewLogin}>
+              <Image
+                source={require("../../../assets/icon.png")}
+                containerStylestyle={styles.containerLogo}
+                style={styles.logo}
+                resizeMode="contain"
+              />
+            </View>
+
+            <Toast
+              ref="toast"
+              position="bottom"
+              positionValue={250}
+              fadeInDuration={1000}
+              fadeOutDuration={1000}
+              opacity={0.8}
+              textStyle={{ color: "#fff" }}
+            />
+
+
             <Form
               ref="loginForm"
               type={loginStruct}
@@ -206,7 +213,7 @@ export default class Map extends Component {
               title="Ingresar"
               onPress={() => this.buscarPersona()}
             />
-            <Divider style={styles.divider}></Divider>
+
           </ScrollView>
 
         </View>
@@ -261,7 +268,6 @@ const styles = StyleSheet.create({
   },
   viewLogin: {
     marginBottom: 5,
-    marginTop: 2,
     alignItems: "center",
   },
 
