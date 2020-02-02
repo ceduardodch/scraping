@@ -25,161 +25,191 @@ export default class Map extends Component {
       url: "",
       user: "",
       pwd: "",
-      user_id:""
+      user_id: "",
+      trans: false,
+      online: false
     };
     this.view_user(false);
   }
+
+  CheckConnectivity = () => {
+    NetInfo.isConnected.fetch().then(isConnected => {
+      isConnected
+        ? this.setState({ online: true })
+        : this.setState({ online: false });
+    });
+  };
+
   async componentDidMount() {
+    this.CheckConnectivity();
     this.view_user();
   }
 
-  async facturar(user_cedula, user_name, user_lastname, user_monto, user_cantidad, user_total, user_subsidio, user_transporte, user_iva) {
+  async facturar(
+    user_cedula,
+    user_name,
+    user_lastname,
+    user_monto,
+    user_cantidad,
+    user_total,
+    user_subsidio,
+    user_transporte,
+    user_iva
+  ) {
     try {
-      user_subtotal = Number(user_transporte) + user_cantidad * 1.6
+      user_subtotal = Number(user_transporte) + user_cantidad * 1.6;
       console.log(user_cedula);
       console.log(user_name);
       console.log(user_lastname);
       this.setState({ loaded: false });
-      prot = this.state.url.split('://');
-      datab = prot[1].split('.');
+      prot = this.state.url.split("://");
+      datab = prot[1].split(".");
       const odoo = new Odoo({
-
         host: prot[1],
         port: 80 /* Defaults to 80 if not specified */,
         database: datab[0],
         username: this.state.user /* Optional if using a stored session_id */,
         password: this.state.pwd /* Optional if using a stored session_id */,
-        protocol: prot[0]/* Defaults to http if not specified */
+        protocol: prot[0] /* Defaults to http if not specified */
       });
 
       await odoo
         .connect()
-        .then(response => { console.log(response); })
-        .catch(e => {
-          console.log(e);
-        });
-
-      const context = {
-        domain: [["id", "=", 1]]
-      };
-
-      await odoo
-        .search_read(
-          "account.account",
-          {
-            domain: [["code", "=", "21.04.01"]]
-          },
-          context
-        )
-        .then(response => {
-          {
-            console.log(response.data[0].id);
-            this.setState({ account_id: response.data[0].id });
-          }
-        })
-        .catch(e => {
-        });
-
-
-        await odoo
-        .search_read(
-          "res.users",
-          {
-            domain: [["login", "=", this.state.username]]
-          },
-          context
-        )
-        .then(response => {
-          {
-            console.log("user_id=====>"+response.data[0].id);
-            this.setState({ user_id: response.data[0].id });
-          }
-        })
-        .catch(e => {
-        });
-
-      await odoo
-        .search_read(
-          "res.partner",
-          {
-            domain: [["vat", "=", user_cedula]]
-          },
-          context
-        )
-        .then(response => {
-          {
-            console.log(response.data[0].id);
-            this.setState({ loaded: true, partner_id: response.data[0].id });
-          }
-        })
-        .catch(e => {
-          this.setState({ partner_flag: false })
-        });
-      console.log("partner_id ========>" + this.state.partner_id)
-      /* Crear partner */
-      if (this.state.partner_id == "") {
-        await odoo.create('res.partner', {
-          name: user_name + ' ' + user_lastname,
-          vat: user_cedula
-        }, context)
-          .then(response => {
-            console.log(response);
-            this.setState({ loaded: true, partner_id: response.data })
-          })
-          .catch(e => { console.log(e); this.setState({ loaded: true }); })
-      }
-
-      /* Crear factura */
-      //console.log(this.state.partner_id);
-      console.log("Crear cabecera");
-      await odoo
-        .create(
-          "account.invoice",
-          {
-            partner_id: this.state.partner_id,
-            type: "out_invoice",
-            total: user_total,
-            montoiva: user_iva,
-            baseimpgrav: user_cantidad * 1.6,
-            baseimponible: user_transporte,
-            subtotal: user_subtotal- user_iva,
-            user_id: this.state.user_id
-          },
-          context
-        )
         .then(response => {
           console.log(response);
-          this.setState({ loaded: true, invoice_id: response.data });
+          this.setState({ trans: true });
         })
         .catch(e => {
           console.log(e);
-          this.setState({ loaded: true });
+          this.setState({ trans: false });
         });
+      if (this.state.trans) {
+        const context = { domain: [["id", "=", 1]] };
 
+        await odoo
+          .search_read(
+            "account.account",
+            {
+              domain: [["code", "=", "21.04.01"]]
+            },
+            context
+          )
+          .then(response => {
+            {
+              console.log(response.data[0].id);
+              this.setState({ account_id: response.data[0].id });
+            }
+          })
+          .catch(e => {
+            this.setState({ trans: false });
+          });
 
+        await odoo
+          .search_read(
+            "res.users",
+            {
+              domain: [["login", "=", this.state.username]]
+            },
+            context
+          )
+          .then(response => {
+            {
+              console.log("user_id=====>" + response.data[0].id);
+              this.setState({ user_id: response.data[0].id });
+            }
+          })
+          .catch(e => {
+            this.setState({ trans: false });
+          });
 
+        await odoo
+          .search_read(
+            "res.partner",
+            {
+              domain: [["vat", "=", user_cedula]]
+            },
+            context
+          )
+          .then(response => {
+            {
+              console.log(response.data[0].id);
+              this.setState({ loaded: true, partner_id: response.data[0].id });
+            }
+          })
+          .catch(e => {
+            this.setState({ partner_flag: false, trans: false });
+          });
+        console.log("partner_id ========>" + this.state.partner_id);
+        /* Crear partner */
+        if (this.state.partner_id == "") {
+          await odoo
+            .create(
+              "res.partner",
+              {
+                name: user_name + " " + user_lastname,
+                vat: user_cedula
+              },
+              context
+            )
+            .then(response => {
+              console.log(response);
+              this.setState({ loaded: true, partner_id: response.data });
+            })
+            .catch(e => {
+              console.log(e);
+              this.setState({ loaded: true, trans: false });
+            });
+        }
 
-      console.log("Producto1");
-      await odoo
-        .search_read(
-          "product.product",
-          {
-            domain: [["default_code", "=", "01"]]
-          },
-          context
-        )
-        .then(response => {
-          {
-            console.log(response.data[0]);
-            this.setState({ loaded: true, product1_id: response.data[0].id, taxes1_id: response.data[0].taxes_id });
-          }
-        })
-        .catch(e => {
-          alert(e);
-        });
+        /* Crear factura */
+        //console.log(this.state.partner_id);
+        console.log("Crear cabecera");
+        await odoo
+          .create(
+            "account.invoice",
+            {
+              partner_id: this.state.partner_id,
+              type: "out_invoice",
+              total: user_total,
+              montoiva: user_iva,
+              baseimpgrav: user_cantidad * 1.6,
+              baseimponible: user_transporte,
+              subtotal: user_subtotal - user_iva,
+              user_id: this.state.user_id
+            },
+            context
+          )
+          .then(response => {
+            console.log(response);
+            this.setState({ loaded: true, invoice_id: response.data });
+          })
+          .catch(e => {
+            console.log(e);
+            this.setState({ loaded: true, trans: false });
+          });
 
-
-
+        console.log("Producto1");
+        await odoo
+          .search_read(
+            "product.product",
+            {
+              domain: [["default_code", "=", "01"]]
+            },
+            context
+          )
+          .then(response => {
+            {
+              console.log(response.data[0]);
+              this.setState({
+                loaded: true,
+                product1_id: response.data[0].id,
+                taxes1_id: response.data[0].taxes_id
+              });
+            }
+          })
+          .catch(e => {
+            this.setState({ trans: false });
+          });
 
         console.log("Producto1");
         await odoo
@@ -193,101 +223,117 @@ export default class Map extends Component {
           .then(response => {
             {
               console.log(response.data[0]);
-              this.setState({ loaded: true, product2_id: response.data[0].id, taxes2_id: response.data[0].taxes_id });
+              this.setState({
+                loaded: true,
+                product2_id: response.data[0].id,
+                taxes2_id: response.data[0].taxes_id
+              });
             }
           })
           .catch(e => {
-            alert(e);
+            this.setState({ trans: false });
           });
 
-          await odoo
-        .create(
-          "account.invoice.line",
-          {
-            invoice_id: this.state.invoice_id,
-            name: "[01] GLP DOMÉSTICO 15 KL",
-            account_id: this.state.account_id,
-            product_id: this.state.product1_id,
-            quantity: user_cantidad,
-            price_unit: "1.6",
-            invoice_line_tax_ids: [[6, 0, this.state.taxes1_id]],
-          },
-          context
-        )
-        .then(response => {
+        await odoo
+          .create(
+            "account.invoice.line",
+            {
+              invoice_id: this.state.invoice_id,
+              name: "[01] GLP DOMÉSTICO 15 KL",
+              account_id: this.state.account_id,
+              product_id: this.state.product1_id,
+              quantity: user_cantidad,
+              price_unit: "1.6",
+              invoice_line_tax_ids: [[6, 0, this.state.taxes1_id]]
+            },
+            context
+          )
+          .then(response => {
+            this.setState({ loaded: true });
+          })
+          .catch(e => {
+            this.setState({ loaded: true, trans: false });
+          });
 
-          this.setState({ loaded: true });
-        })
-        .catch(e => {
-
-          this.setState({ loaded: true });
-        });
-
-      await odoo
-        .create(
-          "account.invoice.line",
-          {
-            invoice_id: this.state.invoice_id,
-            name: "[02] TRANSPORTE A DOMICILIO",
-            account_id: this.state.account_id,
-            product_id: this.state.product2_id,
-            quantity: "1",
-            price_unit: user_transporte,
-            invoice_line_tax_ids: [[6, 0, this.state.taxes2_id]],
-          },
-          context
-        )
-        .then(response => {
-          console.log(response);
-          this.setState({ loaded: true });
-          this.deleteUser(user_cedula);
-          this.refs.toast.show("Información facturada", 1500);
-        })
-        .catch(e => {
-          console.log(e);
-          this.setState({ loaded: true });
-        });
-      await odoo
-        .create(
-          "account.invoice.tax",
-          [{
-            name: "407 12%",
-            invoice_id: this.state.invoice_id,
-            invoice_line_tax_ids: [[6, 0, this.state.taxes1_id]],
-            account_id: this.state.account_id,
-            amount: user_iva
-          },{
-            name: "405 0%",
-            invoice_id: this.state.invoice_id,
-            invoice_line_tax_ids: [[6, 0, this.state.taxes2_id]],
-            account_id: this.state.account_id,
-            amount: 0
-          }],
-          context
-        )
-        .then(response => {
-          console.log(response);
-          this.setState({ loaded: true, invoice_id: response.data });
-        })
-        .catch(e => {
-          console.log(e);
-          this.setState({ loaded: true });
-        });
-    } catch (e) { }
+        await odoo
+          .create(
+            "account.invoice.line",
+            {
+              invoice_id: this.state.invoice_id,
+              name: "[02] TRANSPORTE A DOMICILIO",
+              account_id: this.state.account_id,
+              product_id: this.state.product2_id,
+              quantity: "1",
+              price_unit: user_transporte,
+              invoice_line_tax_ids: [[6, 0, this.state.taxes2_id]]
+            },
+            context
+          )
+          .then(response => {
+            if (this.state.trans) {
+              console.log(response);
+              this.setState({ loaded: true });
+              this.deleteUser(user_cedula);
+              this.refs.toast.show("Información facturada", 1500);
+            } else {
+              this.refs.toast.show("Error transacción", 1500);
+            }
+          })
+          .catch(e => {
+            console.log(e);
+            this.setState({ loaded: true, trans: false });
+          });
+        await odoo
+          .create(
+            "account.invoice.tax",
+            [
+              {
+                name: "407 12%",
+                invoice_id: this.state.invoice_id,
+                invoice_line_tax_ids: [[6, 0, this.state.taxes1_id]],
+                account_id: this.state.account_id,
+                amount: user_iva
+              },
+              {
+                name: "405 0%",
+                invoice_id: this.state.invoice_id,
+                invoice_line_tax_ids: [[6, 0, this.state.taxes2_id]],
+                account_id: this.state.account_id,
+                amount: 0
+              }
+            ],
+            context
+          )
+          .then(response => {
+            console.log(response);
+            this.setState({ loaded: true, invoice_id: response.data });
+          })
+          .catch(e => {
+            console.log(e);
+            this.setState({ loaded: true });
+          });
+      } else {
+        this.refs.toast.show("Problemas con la comunicación", 1500);
+      }
+    } catch (e) {}
   }
 
-  deleteUser = (cedula) => {
+  deleteUser = cedula => {
     console.log("eliminar ==========> " + cedula);
     db.transaction(tx => {
-      tx.executeSql('DELETE FROM  table_user where user_cedula=?', [cedula], (tx, results) => {
-        console.log("Results ==========>", results.rowsAffected);
-        if (results.rowsAffected > 0) {
-          this.refs.toast.show("Información enviada a odoo", 1500);
-          this.view_user();
-        } else {
-          alert("Error al enviar");
+      tx.executeSql(
+        "DELETE FROM  table_user where user_cedula=?",
+        [cedula],
+        (tx, results) => {
+          console.log("Results ==========>", results.rowsAffected);
+          if (results.rowsAffected > 0) {
+            this.refs.toast.show("Información enviada a odoo", 1500);
+            this.view_user();
+          } else {
+            alert("Error al enviar");
+          }
         }
-      });
+      );
     });
   };
   view_user = val => {
@@ -318,30 +364,41 @@ export default class Map extends Component {
           this.setState({
             url: temp1[0].user_url_datos,
             user: temp1[0].user_usuario_datos,
-            pwd: temp1[0].user_contrasena_datos,
-
+            pwd: temp1[0].user_contrasena_datos
           });
         }
       });
     });
-  };
-
+  }
 
   sincronizar() {
     console.log("Sincronizar");
-    this.view_config();
-    db.transaction(tx => {
-      tx.executeSql("SELECT * FROM table_user", [], (tx, results1) => {
-        var temp1 = [];
-        for (let i = 0; i < results1.rows.length; ++i) {
-          temp1.push(results1.rows.item(i));
-          this.facturar(temp1[0].user_cedula, temp1[0].user_name, temp1[0].user_lastname, temp1[0].user_monto, temp1[0].user_cantidad, temp1[0].user_total, temp1[0].user_subsidio, temp1[0].user_transporte, temp1[0].user_iva)
-
-        }
+    this.CheckConnectivity();
+    if (this.state.online) {
+      this.view_config();
+      db.transaction(tx => {
+        tx.executeSql("SELECT * FROM table_user", [], (tx, results1) => {
+          var temp1 = [];
+          for (let i = 0; i < results1.rows.length; ++i) {
+            temp1.push(results1.rows.item(i));
+            this.facturar(
+              temp1[0].user_cedula,
+              temp1[0].user_name,
+              temp1[0].user_lastname,
+              temp1[0].user_monto,
+              temp1[0].user_cantidad,
+              temp1[0].user_total,
+              temp1[0].user_subsidio,
+              temp1[0].user_transporte,
+              temp1[0].user_iva
+            );
+          }
+        });
       });
-    });
-  };
-
+    } else {
+      alert("Conectese a internet");
+    }
+  }
 
   ListViewItemSeparator = () => {
     return (
@@ -380,7 +437,8 @@ export default class Map extends Component {
                   Nombres: <Text style={styles.label}> {item.user_name}</Text>
                 </Text>
                 <Text style={styles.name}>
-                  Apellidos: <Text style={styles.label}>{item.user_lastname}</Text>
+                  Apellidos:{" "}
+                  <Text style={styles.label}>{item.user_lastname}</Text>
                 </Text>
                 <Text style={styles.name}>
                   Iva: <Text style={styles.label}>{item.user_iva} </Text>{" "}
@@ -389,8 +447,15 @@ export default class Map extends Component {
                   Total: <Text style={styles.label}>{item.user_total} </Text>{" "}
                 </Text>
                 <Text style={styles.name}>
-                  Subsidio: <Text style={styles.label}>{item.user_subsidio} </Text>{" "}
+                  Subsidio:{" "}
+                  <Text style={styles.label}>{item.user_subsidio} </Text>{" "}
                 </Text>
+                <Divider style={styles.divider}></Divider>
+                <Button
+                  buttonStyle={styles.buttonLoginContainer}
+                  title="Eliminar"
+                  onPress={() => this.deleteUser(item.user_cedula)}
+                />
               </View>
             )}
           />

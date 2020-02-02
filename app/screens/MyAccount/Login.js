@@ -25,15 +25,28 @@ export default class Map extends Component {
     };
   }
   async componentDidMount() {
+
     db.transaction(tx => {
       tx.executeSql("SELECT * FROM table_user_datos", [], (tx, results) => {
+        if (results.rows.length == 0) {
+          tx.executeSql('DROP TABLE IF EXISTS table_user_datos', []);
+          tx.executeSql(
+            'CREATE TABLE IF NOT EXISTS table_user_datos(user_id_datos INTEGER PRIMARY KEY AUTOINCREMENT,user_contrasena_datos VARCHAR(30),user_usuario_datos VARCHAR(30) ,user_url_datos VARCHAR(30),user_valor_datos VARCHAR(40), user_subsidio_datos VARCHAR(20))',
+            []
+          );
+        }
         if (results.rows.length) {
           this.setState({
             existe: true
           })
           this.props.navigation.navigate("Home");
         }
-      });
+      }, (error) => {      
+        tx.executeSql(
+          'CREATE TABLE IF NOT EXISTS table_user_datos(user_id_datos INTEGER PRIMARY KEY AUTOINCREMENT,user_contrasena_datos VARCHAR(30),user_usuario_datos VARCHAR(30) ,user_url_datos VARCHAR(30),user_valor_datos VARCHAR(40), user_subsidio_datos VARCHAR(20))',
+          []
+        );
+    });
     });
   }
 
@@ -44,13 +57,7 @@ export default class Map extends Component {
         'SELECT * FROM table_user_datos where user_contrasena_datos = ? and user_usuario_datos= ? and user_url_datos = ?',
         [password, usuario, url],
         (tx, results) => {
-          if (results.rows.length == 0) {
-            tx.executeSql('DROP TABLE IF EXISTS table_user_datos', []);
-            tx.executeSql(
-              'CREATE TABLE IF NOT EXISTS table_user_datos(user_id_datos INTEGER PRIMARY KEY AUTOINCREMENT,user_contrasena_datos VARCHAR(30),user_usuario_datos VARCHAR(30) ,user_url_datos VARCHAR(30),user_valor_datos VARCHAR(40), user_subsidio_datos VARCHAR(20))',
-              []
-            );
-          }
+
           var len = results.rows.length;          
           if (len > 0) {
             

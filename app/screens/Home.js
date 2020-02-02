@@ -109,7 +109,7 @@ export default class Home extends Component {
     }
     );
     console.log("sss")
-    this.setState({loaded:true, visible:true})
+    //this.setState({loaded:true, visible:true})
   }
   buscarOdoo() {
     this.buscarPersonaOdoo();
