@@ -1,6 +1,6 @@
 import React, { Component } from "react";
-import { StyleSheet, View, Text, ScrollView, KeyboardAvoidingView } from "react-native";
-import { Image, Button, Divider } from "react-native-elements";
+import { StyleSheet, View,  ScrollView, KeyboardAvoidingView, SliderComponent } from "react-native";
+import { Image, Button } from "react-native-elements";
 import t from "tcomb-form-native";
 import { LoginStruct, LoginOptions } from "../../forms/Login";
 import Toast, { DURATION } from "react-native-easy-toast";
@@ -28,44 +28,44 @@ export default class Map extends Component {
     db.transaction(tx => {
       tx.executeSql("SELECT * FROM table_user_datos", [], (tx, results) => {
         if (results.rows.length) {
-          //this.props.navigation.navigate("Home");
-          console.log("Y existe un usuario");
           this.setState({
             existe: true
           })
+          this.props.navigation.navigate("Home");
         }
       });
     });
   }
 
-  async buscarPersona() {
-    console.log("buscar")
-    const { password, url, usuario } = this.state.loginData;
-    console.log("sw")
+  async buscarPersona() {    
+    const { password, url, usuario } = this.state.loginData;    
     db.transaction(tx => {
       tx.executeSql(
         'SELECT * FROM table_user_datos where user_contrasena_datos = ? and user_usuario_datos= ? and user_url_datos = ?',
         [password, usuario, url],
         (tx, results) => {
-          var len = results.rows.length;
-          console.log('len', len);
+          if (results.rows.length == 0) {
+            tx.executeSql('DROP TABLE IF EXISTS table_user_datos', []);
+            tx.executeSql(
+              'CREATE TABLE IF NOT EXISTS table_user_datos(user_id_datos INTEGER PRIMARY KEY AUTOINCREMENT,user_contrasena_datos VARCHAR(30),user_usuario_datos VARCHAR(30) ,user_url_datos VARCHAR(30),user_valor_datos VARCHAR(40), user_subsidio_datos VARCHAR(20))',
+              []
+            );
+          }
+          var len = results.rows.length;          
           if (len > 0) {
-            this.refs.toast.show("Usuario correcto", 50, () => {
+            
               this.props.navigation.navigate("Home");
-            });
-          } else {
-            console.log("no se encuentra")
+            
+          } else {            
             this.buscarOdoo();
           }
         }
       );
-    }, (error) => {
-      console.log("error en la base: " + error);
-    }, (success) => {
-      console.log("correcto");
+    }, (error) => {      
+      alert("buscarPersona==>"+error)
+    }, (success) => {      
     }
-    );
-    console.log("sss")
+    );    
   }
 
   buscarOdoo() {
@@ -73,20 +73,14 @@ export default class Map extends Component {
       this.buscarPersonaOdoo();
 
     } else {
-
-      console.log("datos incorrectos")
-      this.refs.toast.show("Datos incorrectos");
+      
     }
 
   }
-  async buscarPersonaOdoo() {
-    console.log("dddddxaz")
-    const { password, url, usuario } = this.state.loginData;
-    console.log("p:", password, "u", url, "u", usuario)
+  async buscarPersonaOdoo() {    
+    const { password, url, usuario } = this.state.loginData;    
     prot = url.split('://');
-    datab = prot[1].split('.');
-
-    console.log(prot)
+    datab = prot[1].split('.');    
     const odoo = new Odoo({
       host: prot[1],
       port: 80,
@@ -95,48 +89,20 @@ export default class Map extends Component {
       password: password,
       protocol: prot[0]
     });
+
     await odoo.connect()
       .then(response => {
-        console.log("en este")
-        console.log(response);
-        console.log("g", response.success)
-        if (response.success) {
-          console.log("es correcto")
-        }
-        this.refs.toast.show("Usuario correcto", 50, () => {
-          this.props.navigation.navigate("Datos");
-        });
-        this.register_userDatos();
-      })
-      .catch(e => { console.log(e); })
-    /*
-    const context = {
-      domain: [["id", "=", 1]],
-    }
-    await odoo.search_read('res.users', params, context)
-      .then(response => {
-        const arrayMarkers = [];
-        response.data.map((element, i) => {
-          console.log(element)
-          arrayMarkers.push("id:", i, element)
-        })
-        if (arrayMarkers.length === 0) {
-          this.refs.toast.show("No existe usuario", 1500);
-        } else {
-          this.refs.toast.show("Usuario correcto", 75, () => {
-            this.props.navigation.navigate("Datos");
-          });
+        if (response.success) {            
           this.register_userDatos();
-        }
+          this.props.navigation.navigate("Datos");         
+        }     
+        else {  
+          alert("Usuario o clave incorrectos");          
+        }    
       })
-      .catch(e => {
-        alert(e)
-      });
-*/
-
+      .catch(e => { alert(e); })    
   }
-  register_userDatos = () => {
-    console.log("en el guardAR ")
+  register_userDatos = () => {    
     const { password, url, usuario } = this.state.loginData;
     var user_valor_datos = "1.60";
     var user_subsidio_datos = "7.66";
@@ -145,19 +111,17 @@ export default class Map extends Component {
       tx.executeSql(
         'INSERT INTO table_user_datos (user_contrasena_datos,user_usuario_datos,user_url_datos,user_valor_datos,user_subsidio_datos) VALUES (?,?,?,?,?)',
         [password, usuario, url, user_valor_datos, user_subsidio_datos],
-        (tx, results) => {
-          console.log('Results', results.rowsAffected);
-          if (results.rowsAffected > 0) {
-            console.log("se ingreso")
+        (tx, results) => {          
+          if (results.rowsAffected > 0) {            
           } else {
-            alert('Registro fallido');
+            alert('Registro fallido 0');
           }
         }, (err) => {
-          console.log("error", err)
+          alert('Registro fallido tx');
         }
       )
     }, (error) => {
-      console.log("error en la base: " + error)
+      alert("error en la base sqllite: " + error)
     },
     );
   };

@@ -67,7 +67,7 @@ export default class Map extends Component {
         .search_read(
           "account.account",
           {
-            domain: [["code", "=", "10.01.011"]]
+            domain: [["code", "=", "21.04.01"]]
           },
           context
         )
@@ -142,7 +142,7 @@ export default class Map extends Component {
             montoiva: user_iva,
             baseimpgrav: user_cantidad * 1.6,
             baseimponible: user_transporte,
-            subtotal: user_subtotal,
+            subtotal: user_subtotal- user_iva,
             user_id: this.state.user_id
           },
           context
@@ -159,7 +159,7 @@ export default class Map extends Component {
 
 
 
-      console.log("Crear lineas");
+      console.log("Producto1");
       await odoo
         .search_read(
           "product.product",
@@ -181,27 +181,26 @@ export default class Map extends Component {
 
 
 
+        console.log("Producto1");
+        await odoo
+          .search_read(
+            "product.product",
+            {
+              domain: [["default_code", "=", "02"]]
+            },
+            context
+          )
+          .then(response => {
+            {
+              console.log(response.data[0]);
+              this.setState({ loaded: true, product2_id: response.data[0].id, taxes2_id: response.data[0].taxes_id });
+            }
+          })
+          .catch(e => {
+            alert(e);
+          });
 
-      console.log("Productos");
-      await odoo
-        .search_read(
-          "product.product",
-          {
-            domain: [["default_code", "=", "02"]]
-          },
-          context
-        )
-        .then(response => {
-          {
-            console.log(response.data[0].taxes_id);
-            this.setState({ loaded: true, product2_id: response.data[0].id, taxes2_id: response.data[0].taxes_id });
-          }
-        })
-        .catch(e => {
-
-        });
-
-      await odoo
+          await odoo
         .create(
           "account.invoice.line",
           {
@@ -234,7 +233,7 @@ export default class Map extends Component {
             product_id: this.state.product2_id,
             quantity: "1",
             price_unit: user_transporte,
-            invoice_line_tax_id: [[6, 0, this.state.taxes2_id]],
+            invoice_line_tax_ids: [[6, 0, this.state.taxes2_id]],
           },
           context
         )
@@ -251,13 +250,19 @@ export default class Map extends Component {
       await odoo
         .create(
           "account.invoice.tax",
-          {
+          [{
             name: "407 12%",
             invoice_id: this.state.invoice_id,
             invoice_line_tax_ids: [[6, 0, this.state.taxes1_id]],
             account_id: this.state.account_id,
             amount: user_iva
-          },
+          },{
+            name: "405 0%",
+            invoice_id: this.state.invoice_id,
+            invoice_line_tax_ids: [[6, 0, this.state.taxes2_id]],
+            account_id: this.state.account_id,
+            amount: 0
+          }],
           context
         )
         .then(response => {

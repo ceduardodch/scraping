@@ -41,14 +41,6 @@ const DatosClienteScreenStack = createStackNavigator({
 });
 
 const profileScreenStack = createStackNavigator({
-  Profile: {
-    screen: ProfileScreen,
-    navigationOptions: ({ navigation }) => ({
-      header: null,
-      title: "Mi cuenta",
-    
-    })
-  },
   Login: {
     screen: LoginScreen,
     navigationOptions: ({ navigation }) => ({

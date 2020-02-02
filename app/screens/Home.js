@@ -16,6 +16,7 @@ export default class Home extends Component {
   constructor(props) {
     super(props)
     this.state = {
+      online:false,
       facturaStruct: FacturaStruct,
       facturaOptions: FacturaOptions,
       facturaData: {
@@ -46,38 +47,16 @@ export default class Home extends Component {
     };
 
   }
- 
+  async componentDidMount() {
+    this.CheckConnectivity();
+  }
+
   CheckConnectivity = () => {
-    // For Android devices
-    if (Platform.OS === "android") {
-      NetInfo.isConnected.fetch().then(isConnected => {
-        if (isConnected) {
-          Alert.alert("You are online!");
-        } else {
-          Alert.alert("You are offline!");
-        }
-      });
-    } else {
-      // For iOS devices
-      NetInfo.isConnected.addEventListener(
-        "connectionChange",
-        this.handleFirstConnectivityChange
-      );
-    }
+    NetInfo.isConnected.fetch().then(isConnected => {
+      isConnected ? this.setState({online:true}) : this.setState({online:false})
+    });
   };
 
-  handleFirstConnectivityChange = isConnected => {
-    NetInfo.isConnected.removeEventListener(
-      "connectionChange",
-      this.handleFirstConnectivityChange
-    );
-
-    if (isConnected === false) {
-      Alert.alert("You are offline!");
-    } else {
-      Alert.alert("You are online!");
-    }
-  };
 
   async buscarPersona(cantidad, monto) {
     console.log("buscar")
@@ -114,7 +93,12 @@ export default class Home extends Component {
             )
           } else {
             console.log("no se encuentra")
+            
+            console.log("online===>"+ this.state.online)
+            if(this.state.online)
+            {            
             this.buscarOdoo();
+            }
           }
         }
       );
@@ -125,6 +109,7 @@ export default class Home extends Component {
     }
     );
     console.log("sss")
+    this.setState({loaded:true, visible:true})
   }
   buscarOdoo() {
     this.buscarPersonaOdoo();
@@ -253,6 +238,7 @@ export default class Home extends Component {
   register_user = () => {
     console.log("en el guardAR ")
     const {
+      loaded,
       formRegistro,
       facturaData,
     } = this.state
@@ -274,11 +260,14 @@ export default class Home extends Component {
           console.log('Results', results.rowsAffected);
           if (results.rowsAffected > 0) {
             console.log("correcto")
+            
           } else {
             alert('Registro fallido');
+            
           }
         }, (err) => {
           console.log("e", err)
+          
         }
       )
     }, (error) => {
@@ -287,7 +276,7 @@ export default class Home extends Component {
       console.log("Ingreso correcto")
       this.refs.toast.show("Factura generada", 1500);
       this.setState({
-        visible: false
+        visible: false, loaded:true
       });
     }
     );

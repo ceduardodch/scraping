@@ -17,7 +17,7 @@ export const LoginOptions = {
             label:"URL(*)",                        
             template: inputTempString,
             config:{
-                placeholder:"Ingrese la URL",
+                placeholder:"http://ejemplo.com",
                 iconType:"material-community",
                 iconName:"internet-explorer"
             }
