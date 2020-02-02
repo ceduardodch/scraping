@@ -12,17 +12,20 @@ export default class ProfileGuest extends Component {
     const { goToScreen } = this.props;
     return (
       <View style={styles.viewBody}>
-        <Image
-          source={require("../../../assets/icon.png")}
-          style={styles.image}
-          PlaceholderContent={<ActivityIndicator />}
-          resizeMode="contain"
-        />
-        <Text style={styles.title}>Consulta tú perfil</Text>
-        <Text style={styles.description}>La forma más de fácil de facturar</Text>
+        <View style={styles.viewBodyCon}>
+          <Image
+            source={require("../../../assets/icon.png")}
+            style={styles.image}
+            PlaceholderContent={<ActivityIndicator />}
+            resizeMode="contain"
+          />
+          <Text style={styles.title}>DISGAS</Text>
+          <Text style={styles.description}>La forma más de fácil de facturar</Text>
+        </View>
+
         <Button
           buttonStyle={styles.btnViewProfile}
-          title="Ver tu perfil"
+          title="Ver tú perfil"
           onPress={() => goToScreen("Login")}
         />
       </View>
@@ -31,31 +34,29 @@ export default class ProfileGuest extends Component {
 }
 const styles = StyleSheet.create({
   viewBody: {
+    flex: 1
+  },
+  viewBodyCon: {
     flex: 1,
-    alignItems: "center",
     justifyContent: "center",
-    paddingLeft: 30,
-    paddingRight: 30
+    alignItems: "center"
   },
   image: {
     height: 300,
-    marginBottom: 40
+    marginBottom: 30,
   },
   title: {
     fontWeight: "bold",
-    fontSize: 19,
-    marginBottom: 10
+    fontSize: 25,
+ 
   },
   description: {
     textAlign: "center",
-    marginBottom: 20
+    marginBottom: 10
   },
   btnViewProfile: {
+    borderRadius:0,
     backgroundColor: "#00a680",
-    marginTop: 20,
-    paddingTop: 10,
-    marginHorizontal: 10,
-    paddingBottom: 10
   },
 
 
