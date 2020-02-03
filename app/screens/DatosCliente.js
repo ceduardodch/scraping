@@ -168,8 +168,14 @@ export default class DatosCliente extends Component {
 
   deleteUser = () => {
     console.log("volver")
-    db.transaction(tx => {
-      tx.executeSql('DELETE FROM  table_user_datos',[], (tx, results) => {
+    db.transaction(function (txn) {
+    txn.executeSql('DROP TABLE IF EXISTS table_user', []);
+    txn.executeSql('DROP TABLE IF EXISTS table_user_datos', []);
+    
+    })
+    this.props.navigation.navigate("Login")
+    /*db.transaction(tx => {
+      tx.executeSql('DROP TABLE  table_user_datos',[], (tx, results) => {
         console.log("Results ==========>", results.rowsAffected);
         if (results.rowsAffected > 0) {
           this.props.navigation.navigate("Login")
@@ -178,6 +184,16 @@ export default class DatosCliente extends Component {
         }
       });
     });
+    db.transaction(tx => {
+      tx.executeSql('DROP TABLE table_user',[], (tx, results) => {
+        console.log("Results ==========>", results.rowsAffected);
+        if (results.rowsAffected > 0) {
+          this.props.navigation.navigate("Login")
+        } else {
+          Console.log("No borra")
+        }
+      });
+    });*/
   };
   onChangeFormFactura = facturaValue => {
 

@@ -28,15 +28,22 @@ export default class UpdateName extends Component {
             inputValueThree: inputData
         });
     };
+    onChangeInputFour = inputData => {
+        this.setState({
+            inputValueFour: inputData
+        });
+    };
 
 
     updateClient = () => {
         console.log("gsgsgs")
         let names = this.state.inputValueOne;
         let lastnames = this.state.inputValueTwo;
-        let correo = this.state.inputValueThree;
+        let email = this.state.inputValueThree;
+        let phone = this.state.inputValueFour
         let cedula = this.state.cedula;
-        if (names && lastnames && correo) {
+        
+        if (names && lastnames && email) {
             /*  db.transaction((tx) => {
                   tx.executeSql(
                       'UPDATE table_user set user_name=?, user_lastname=? where user_cedula=?',
@@ -54,7 +61,7 @@ export default class UpdateName extends Component {
               });*/
 
             this.close();
-            this.state.updateClient(names, lastnames, cedula);
+            this.state.updateClient(names, lastnames, cedula, email, phone);
             this.state.insertData()
 
         } else {
@@ -76,6 +83,7 @@ export default class UpdateName extends Component {
             inputValueOne,
             inputValueTwo,
             inputValueThree,
+            inputValueFour,
         } = this.state;
 
         return (
@@ -107,6 +115,12 @@ export default class UpdateName extends Component {
                         onChangeText={value => this.onChangeInputThree(value)}
                         keyboardType="email-address"
                         value={inputValueThree}
+                    />
+                    <Input
+                        containerStyle={styles.inputContainer}
+                        placeholder="Télefono"
+                        onChangeText={value => this.onChangeInputFour(value)}                        
+                        value={inputValueFour}
                     />
                     <Button
                         buttonStyle={styles.buttonUpdate}

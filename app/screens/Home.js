@@ -29,7 +29,9 @@ export default class Home extends Component {
       formRegistro: {
         names: '',
         lastnames: '',
-        cedula: ''
+        cedula: '',
+        email:"",
+        phone:""
       },
       tableHead: ['Descripción', 'Cantidad', 'Total'],
       tableData: "",
@@ -47,7 +49,43 @@ export default class Home extends Component {
     };
 
   }
-  async componentDidMount() {
+    async componentDidMount() {
+
+      db.transaction(tx => {
+        tx.executeSql("SELECT * FROM table_partner where partner_cedula = ?", [], (tx, results) => {
+          if (results.rows.length == 0) {
+            tx.executeSql('DROP TABLE IF EXISTS table_partner', []);
+            tx.executeSql(
+              'CREATE TABLE IF NOT EXISTS table_partner(partner_id INTEGER PRIMARY KEY AUTOINCREMENT,partner_cedula VARCHAR(20),partner_name VARCHAR(40), partner_lastname VARCHAR(40),partner_email VARCHAR(40), partner_phone VARCHAR(40))',
+              []
+            );
+          }
+          
+        }, (error) => {      
+          tx.executeSql(
+            'CREATE TABLE IF NOT EXISTS table_partner(partner_id INTEGER PRIMARY KEY AUTOINCREMENT,partner_cedula VARCHAR(20),partner_name VARCHAR(40), partner_lastname VARCHAR(40),partner_email VARCHAR(40), partner_phone VARCHAR(40))',
+            []
+          );
+      });
+      });
+      db.transaction(tx => {
+        tx.executeSql("SELECT * FROM table_user", [], (tx, results) => {
+          if (results.rows.length == 0) {
+            tx.executeSql('DROP TABLE IF EXISTS table_user', []);
+            tx.executeSql(
+              'CREATE TABLE IF NOT EXISTS table_user(user_id INTEGER PRIMARY KEY AUTOINCREMENT,user_cedula VARCHAR(20),user_name VARCHAR(40), user_lastname VARCHAR(40),user_email VARCHAR(40),user_phone VARCHAR(40), user_monto VARCHAR(10),user_cantidad VARCHAR(20),user_total VARCHAR(20),user_subsidio VARCHAR(20),user_transporte VARCHAR(20),user_iva VARCHAR(20))',
+              []
+            );
+          }
+          
+        }, (error) => {      
+          tx.executeSql(
+            'CREATE TABLE IF NOT EXISTS table_partner(partner_id INTEGER PRIMARY KEY AUTOINCREMENT,partner_cedula VARCHAR(20),partner_name VARCHAR(40), partner_lastname VARCHAR(40),partner_email VARCHAR(40), partner_phone VARCHAR(40))',
+            []
+          );
+      });
+      });
+    
     this.CheckConnectivity();
   }
 
@@ -59,6 +97,7 @@ export default class Home extends Component {
 
 
   async buscarPersona(cantidad, monto) {
+    this.CheckConnectivity();
     console.log("buscar")
     this.setState({
       loaded: false,
@@ -75,25 +114,33 @@ export default class Home extends Component {
     console.log("sw")
     db.transaction(tx => {
       tx.executeSql(
-        'SELECT * FROM table_user where user_cedula = ?',
+        'SELECT * FROM table_partner where partner_cedula = ?',
         [cedula],
         (tx, results) => {
           var len = results.rows.length;
           console.log('len', len);
+          if (results.rows.length == 0) {
+            tx.executeSql('DROP TABLE IF EXISTS table_partner', []);
+            tx.executeSql(
+              'CREATE TABLE IF NOT EXISTS table_partner(partner_id INTEGER PRIMARY KEY AUTOINCREMENT,partner_cedula VARCHAR(20),partner_name VARCHAR(40), partner_lastname VARCHAR(40),partner_email VARCHAR(40), partner_phone VARCHAR(40))',
+              []
+            );
+          }
           if (len > 0) {
             this.setState({
               formRegistro: {
-                names: results.rows.item(0).user_name,
-                lastnames: results.rows.item(0).user_lastname,
-                cedula: results.rows.item(0).user_cedula,
+                names: results.rows.item(0).partner_name,
+                lastnames: results.rows.item(0).partner_lastname,
+                cedula: results.rows.item(0).partner_cedula,
+                email: results.rows.item(0).partner_email,
+                phone: results.rows.item(0).partner_phone,
               },
               loaded: true,
               visible: true
             }
             )
           } else {
-            console.log("no se encuentra")
-            
+            console.log("no se encuentra")            
             console.log("online===>"+ this.state.online)
             if(this.state.online)
             {            
@@ -180,27 +227,30 @@ export default class Home extends Component {
   updateInfo = () => {
     this.refs.toast.show("Datos modificados", 1500);
   }
-  updateClient = async (name, lastname, cedula) => {
+  updateClient = async (name, lastname, cedula, email, telefono) => {
     this.setState({
       formRegistro: {
         names: name,
         lastnames: lastname,
-        cedula: cedula
+        cedula: cedula,
+        email: email,
+        phone: telefono
       }
     }
     )
   }
-  updateUsers = (close, updateInfo, cedula, name, lastname) => {
+  updateUsers = (close, updateInfo, cedula, name, lastname,email, telefono) => {
     this.setState({
       overlayComponent: (
         <UpdateName
           isVisibleOverlay={true}
           inputValueOne={name}
           inputValueTwo={lastname}
-          inputValueThree=""
+          inputValueThree={email}
+          inputValueFour={telefono}
           close={close}
           insertData={updateInfo}
-          cedula={cedula}
+          cedula={cedula}           
           updateClient={this.updateClient}
         />)
     });
@@ -235,6 +285,7 @@ export default class Home extends Component {
   }
 
 
+
   register_user = () => {
     console.log("en el guardAR ")
     const {
@@ -242,6 +293,13 @@ export default class Home extends Component {
       formRegistro,
       facturaData,
     } = this.state
+    /*Clientes*/ 
+    var partner_cedula = facturaData.cedula;
+    var partner_name = formRegistro.names;
+    var partner_lastname = formRegistro.lastnames;
+    var partner_email = formRegistro.email;
+    var partner_phone = formRegistro.phone;
+    /*Detalle*/ 
     var user_name = formRegistro.names;
     var user_lastname = formRegistro.lastnames;
     var user_monto = facturaData.monto;
@@ -254,8 +312,8 @@ export default class Home extends Component {
     console.log("luego en traccasion")
     db.transaction(function (tx) {
       tx.executeSql(
-        'INSERT INTO table_user (user_cedula,user_name,user_lastname,user_monto,user_cantidad,user_total,user_subsidio,user_transporte,user_iva) VALUES (?,?,?,?,?,?,?,?,?)',
-        [user_cedula, user_name, user_lastname, user_monto, user_cantidad, user_total, user_subsidio, user_transporte, user_iva],
+        'INSERT INTO table_user (user_cedula,user_name,user_lastname,user_email, user_phone,user_monto,user_cantidad,user_total,user_subsidio,user_transporte,user_iva) VALUES (?,?,?,?,?,?,?,?,?,?,?)',
+        [user_cedula, user_name, user_lastname, partner_email, partner_phone,user_monto, user_cantidad, user_total, user_subsidio, user_transporte, user_iva],
         (tx, results) => {
           console.log('Results', results.rowsAffected);
           if (results.rowsAffected > 0) {
@@ -280,6 +338,40 @@ export default class Home extends Component {
       });
     }
     );
+
+
+/*Registar Cliente*/
+
+    db.transaction(function (tx) {
+      tx.executeSql(
+        'INSERT INTO table_partner (partner_cedula,partner_name,partner_lastname,partner_email, partner_phone) VALUES (?,?,?,?,?)',
+        [partner_cedula, partner_name, partner_lastname, partner_email, partner_phone],
+        (tx, results) => {
+          console.log('Results', results.rowsAffected);
+          if (results.rowsAffected > 0) {
+            console.log("correcto")
+            
+          } else {
+            alert('Registro fallido');
+            
+          }
+        }, (err) => {
+          console.log("e", err)
+          
+        }
+      )
+    }, (error) => {
+      console.log("error en la base: " + error)
+    }, (success) => {
+      console.log("Ingreso correcto")
+      this.refs.toast.show("Factura generada", 1500);
+      this.setState({
+        visible: false, loaded:true
+      });
+    }
+    );
+
+
 
 
   }
@@ -326,9 +418,10 @@ export default class Home extends Component {
                 <Text style={styles.name}>Identificación: <Text style={styles.label}>{this.state.formRegistro.cedula}</Text></Text>
                 <Text style={styles.name}>Nombres: <Text style={styles.label}>{this.state.formRegistro.names}</Text></Text>
                 <Text style={styles.name}>Apellidos: <Text style={styles.label}>{this.state.formRegistro.lastnames}</Text></Text>
-                <Text style={styles.name}>Correo: <Text style={styles.label}>{""}</Text></Text>
+                <Text style={styles.name}>Correo: <Text style={styles.label}>{this.state.formRegistro.email}</Text></Text>
+                <Text style={styles.name}>Télefono: <Text style={styles.label}>{this.state.formRegistro.phone}</Text></Text>
                 <View style={styles.register}>
-                  <Text style={styles.btnRegister} onPress={() => this.updateUsers(this.close, this.updateInfo, this.state.facturaData.cedula, this.state.formRegistro.names, this.state.formRegistro.lastnames)}>Modificar datos</Text>
+                  <Text style={styles.btnRegister} onPress={() => this.updateUsers(this.close, this.updateInfo, this.state.facturaData.cedula, this.state.formRegistro.names, this.state.formRegistro.lastnames,this.state.formRegistro.email,this.state.formRegistro.phone)}>Modificar datos</Text>
                 </View>
 
 

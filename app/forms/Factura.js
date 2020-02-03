@@ -1,7 +1,7 @@
 import React  from "react";
 import t from "tcomb-form-native";
 import formValidation from "../utils/Validation";
-import inputTemplate from "./templates/InputString"
+import inputTemplate from "./templates/Input"
 
 
 export  const FacturaStruct = t.struct({

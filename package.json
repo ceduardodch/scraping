@@ -8,6 +8,7 @@
     "eject": "expo eject"
   },
   "dependencies": {
+    "@react-native-community/async-storage": "^1.7.1",
     "expo": "^35.0.0",
     "expo-sqlite": "~7.0.0",
     "react": "16.8.3",

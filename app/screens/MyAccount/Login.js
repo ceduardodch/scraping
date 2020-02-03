@@ -6,6 +6,7 @@ import { LoginStruct, LoginOptions } from "../../forms/Login";
 import Toast, { DURATION } from "react-native-easy-toast";
 import Odoo from "react-native-odoo-promise-based";
 import * as SQLite from 'expo-sqlite';
+
 const db = SQLite.openDatabase("Factura.db");
 const Form = t.form.Form;
 
