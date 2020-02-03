@@ -230,11 +230,13 @@ export default class Map extends Component {
         const dataFact ={
                           partner_id: partner_id,
                           type: "out_invoice",
+                          date_invoice: Date().getDate(),
                           total: user_total,
                           montoiva: user_iva,
                           baseimpgrav: user_cantidad * 1.6,
                           baseimponible: user_transporte,
                           subtotal: user_subtotal - user_iva,
+
                         }
         await odoo
           .create(
