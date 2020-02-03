@@ -59,6 +59,12 @@ export default class Map extends Component {
     user_iva
   ) {
     try {
+      let account_id
+      let account_id_c
+      let account_id_p
+      let partner_id
+      let invoice_id
+      
       user_subtotal = Number(user_transporte) + user_cantidad * 1.6;
       console.log(user_cedula);
       console.log(user_name);
@@ -94,7 +100,7 @@ export default class Map extends Component {
             tz: 'America/Lima'
           };
 
-      await odoo
+          await odoo
           .search_read(
             "account.account",
             {
@@ -105,7 +111,41 @@ export default class Map extends Component {
           .then(response => {
             {
               console.log(response.data[0].id);
-              this.setState({account_id: response.data[0].id });
+              account_id= response.data[0].id ;
+            }
+          })
+          .catch(e => {
+            this.setState({ trans: false });
+          });
+          await odoo
+          .search_read(
+            "account.account",
+            {
+              domain: [["code", "=", "11.03.01.01"]]
+            },
+            context
+          )
+          .then(response => {
+            {
+              console.log(response.data[0].id);
+              account_id_c= response.data[0].id ;
+            }
+          })
+          .catch(e => {
+            this.setState({ trans: false });
+          });
+      await odoo
+          .search_read(
+            "account.account",
+            {
+              domain: [["code", "=", "21.01.02.03"]]
+            },
+            context
+          )
+          .then(response => {
+            {
+              console.log(response.data[0].id);
+              account_id_p= response.data[0].id ;
             }
           })
           .catch(e => {
@@ -124,35 +164,42 @@ export default class Map extends Component {
           .then(response => {
             {
               console.log(response.data[0].id);
-              this.setState({ partner_id: response.data[0].id });
+              partner_id= response.data[0].id;
             }
           })
           .catch(e => {
             this.setState({ partner_flag: false, trans: false });
+            
           });
-        console.log("partner_id ========>" + this.state.partner_id);
+        console.log("partner_id ========>" + partner_id);
         /* Crear partner */
-        if (this.state.partner_id == "") {
-          await odoo
+        if(!partner_id)
+          {
+        await odoo
             .create(
               "res.partner",
               {
                 name: user_name + " " + user_lastname,
                 vat: user_cedula,
                 phone:user_phone,
-                email: user_email
+                email: user_email,
+                property_account_receivable_id: account_id_c,
+                property_account_payable_id: account_id_p,
+
               },
               context
             )
             .then(response => {
               console.log(response);
-              this.setState({partner_id: response.data})
+              partner_id= response.data
             })
             .catch(e => {
               console.log(e);
               this.setState({ trans: false });
             });
-        }
+
+          }
+
         await odoo
           .search_read(
             "product.product",
@@ -181,23 +228,13 @@ export default class Map extends Component {
         //console.log(this.state.partner_id);
         console.log("Crear cabecera");
         const dataFact ={
-                          partner_id: this.state.partner_id,
+                          partner_id: partner_id,
                           type: "out_invoice",
                           total: user_total,
                           montoiva: user_iva,
                           baseimpgrav: user_cantidad * 1.6,
                           baseimponible: user_transporte,
                           subtotal: user_subtotal - user_iva,
-                          //user_id: this.state.user_id,
-                          invoice_line:{
-                            //invoice_id: this.state.invoice_id,
-                            name: "[01] GLP DOMÉSTICO 15 KL",
-                            account_id: this.state.account_id,
-                            product_id: this.state.product1_id,
-                            quantity: user_cantidad,
-                            price_unit: "1.6",
-                            invoice_line_tax_ids: [[6, 0, this.state.taxes1_id]]
-                          }                      
                         }
         await odoo
           .create(
@@ -207,14 +244,14 @@ export default class Map extends Component {
           )
           .then(response => {
             console.log(response);
-            this.setState({ invoice_id: response.data });
+            invoice_id= response.data;
           })
           .catch(e => {
             console.log(e);
             this.setState({ trans: false });
           });
 
-        console.log("Invoiceid ===>"+ this.state.invoice_id);
+        console.log("Invoiceid ===>"+ invoice_id);
         await odoo
           .search_read(
             "product.product",
@@ -264,9 +301,9 @@ export default class Map extends Component {
           .create(
             "account.invoice.line",
             {
-              invoice_id: this.state.invoice_id,
+              invoice_id: invoice_id,
               name: "[01] GLP DOMÉSTICO 15 KL",
-              account_id: this.state.account_id,
+              account_id: account_id,
               product_id: this.state.product1_id,
               quantity: user_cantidad,
               price_unit: "1.6",
@@ -287,16 +324,16 @@ export default class Map extends Component {
             [
               {
                 name: "407 12%",
-                invoice_id: this.state.invoice_id,
+                invoice_id: invoice_id,
                 invoice_line_tax_ids: [[6, 0, this.state.taxes1_id]],
-                account_id: this.state.account_id,
+                account_id: account_id,
                 amount: user_iva
               },
               {
                 name: "405 0%",
-                invoice_id: this.state.invoice_id,
+                invoice_id: invoice_id,
                 invoice_line_tax_ids: [[6, 0, this.state.taxes2_id]],
-                account_id: this.state.account_id,
+                account_id: account_id,
                 amount: 0
               }
             ],
@@ -313,9 +350,9 @@ export default class Map extends Component {
           .create(
             "account.invoice.line",
             {
-              invoice_id: this.state.invoice_id,
+              invoice_id: invoice_id,
               name: "[02] TRANSPORTE A DOMICILIO",
-              account_id: this.state.account_id,
+              account_id: account_id,
               product_id: this.state.product2_id,
               quantity: "1",
               price_unit: user_transporte,
