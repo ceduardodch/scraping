@@ -1,7 +1,7 @@
 import React, { Component } from "react";
-import { StyleSheet, View, FlatList, Text, Alert,NetInfo } from "react-native";
+import { StyleSheet, View, FlatList, Text, Alert, NetInfo } from "react-native";
 import Odoo from "react-native-odoo-promise-based";
-import { Button,Icon } from "react-native-elements";
+import { Button, Icon } from "react-native-elements";
 import Toast, { DURATION } from "react-native-easy-toast";
 import ActionButton from "react-native-action-button";
 import * as SQLite from "expo-sqlite";
@@ -64,7 +64,7 @@ export default class Map extends Component {
       let account_id_p
       let partner_id
       let invoice_id
-      
+
       user_subtotal = Number(user_transporte) + user_cantidad * 1.6;
       console.log(user_cedula);
       console.log(user_name);
@@ -91,16 +91,14 @@ export default class Map extends Component {
           console.log(e);
           this.setState({ trans: false });
         });
-      console.log("trans==========>"+this.state.trans);  
+      console.log("trans==========>" + this.state.trans);
       //if (this.state.trans) {
-        try{
-
-          const context = {
-            lang: 'es_EC',            
-            tz: 'America/Lima'
-          };
-
-          await odoo
+      try {
+        const context = {
+          lang: 'es_EC',
+          tz: 'America/Lima'
+        };
+        await odoo
           .search_read(
             "account.account",
             {
@@ -111,13 +109,13 @@ export default class Map extends Component {
           .then(response => {
             {
               console.log(response.data[0].id);
-              account_id= response.data[0].id ;
+              account_id = response.data[0].id;
             }
           })
           .catch(e => {
             this.setState({ trans: false });
           });
-          await odoo
+        await odoo
           .search_read(
             "account.account",
             {
@@ -128,13 +126,13 @@ export default class Map extends Component {
           .then(response => {
             {
               console.log(response.data[0].id);
-              account_id_c= response.data[0].id ;
+              account_id_c = response.data[0].id;
             }
           })
           .catch(e => {
             this.setState({ trans: false });
           });
-      await odoo
+        await odoo
           .search_read(
             "account.account",
             {
@@ -145,14 +143,14 @@ export default class Map extends Component {
           .then(response => {
             {
               console.log(response.data[0].id);
-              account_id_p= response.data[0].id ;
+              account_id_p = response.data[0].id;
             }
           })
           .catch(e => {
             this.setState({ trans: false });
           });
 
-        
+
         await odoo
           .search_read(
             "res.partner",
@@ -164,24 +162,23 @@ export default class Map extends Component {
           .then(response => {
             {
               console.log(response.data[0].id);
-              partner_id= response.data[0].id;
+              partner_id = response.data[0].id;
             }
           })
           .catch(e => {
             this.setState({ partner_flag: false, trans: false });
-            
+
           });
         console.log("partner_id ========>" + partner_id);
         /* Crear partner */
-        if(!partner_id)
-          {
-        await odoo
+        if (!partner_id) {
+          await odoo
             .create(
               "res.partner",
               {
                 name: user_name + " " + user_lastname,
                 vat: user_cedula,
-                phone:user_phone,
+                phone: user_phone,
                 email: user_email,
                 property_account_receivable_id: account_id_c,
                 property_account_payable_id: account_id_p,
@@ -191,14 +188,14 @@ export default class Map extends Component {
             )
             .then(response => {
               console.log(response);
-              partner_id= response.data
+              partner_id = response.data
             })
             .catch(e => {
               console.log(e);
               this.setState({ trans: false });
             });
 
-          }
+        }
 
         await odoo
           .search_read(
@@ -210,13 +207,13 @@ export default class Map extends Component {
           )
           .then(response => {
             {
-              console.log("Taxes1==>"+response.data[0]);
+              console.log("Taxes1==>" + response.data[0]);
               product1_id: response.data[0].id,
-              this.setState({
-                loaded: true,
-                
-                taxes1_id: response.data[0].taxes_id
-              });
+                this.setState({
+                  loaded: true,
+
+                  taxes1_id: response.data[0].taxes_id
+                });
             }
           })
           .catch(e => {
@@ -226,18 +223,24 @@ export default class Map extends Component {
 
         /* Crear factura */
         //console.log(this.state.partner_id);
-        console.log("Crear cabecera");
-        const dataFact ={
-                          partner_id: partner_id,
-                          type: "out_invoice",
-                          //date_invoice: Date().getDate(),
-                          total: user_total,
-                          montoiva: user_iva,
-                          baseimpgrav: user_cantidad * 1.6,
-                          baseimponible: user_transporte,
-                          subtotal: user_total - user_iva,
 
-                        }
+        console.log("Crear cabecera");
+        let f = new Date()
+        let month = f.getMonth() + 1;
+        if (month < 10) {
+          month = "0" + month
+        }
+        const dataFact = {
+          partner_id: partner_id,
+          type: "out_invoice",
+          date_invoice: f.getDate() + "/" + month + "/" + f.getFullYear(),
+          total: user_total,
+          montoiva: user_iva,
+          baseimpgrav: user_cantidad * 1.6,
+          baseimponible: user_transporte,
+          subtotal: user_total - user_iva,
+
+        }
         await odoo
           .create(
             "account.invoice",
@@ -246,14 +249,14 @@ export default class Map extends Component {
           )
           .then(response => {
             console.log(response);
-            invoice_id= response.data;
+            invoice_id = response.data;
           })
           .catch(e => {
             console.log(e);
             this.setState({ trans: false });
           });
 
-        console.log("Invoiceid ===>"+ invoice_id);
+        console.log("Invoiceid ===>" + invoice_id);
         await odoo
           .search_read(
             "product.product",
@@ -264,7 +267,7 @@ export default class Map extends Component {
           )
           .then(response => {
             {
-              console.log("Taxes1==>"+response.data[0]);
+              console.log("Taxes1==>" + response.data[0]);
               this.setState({
                 loaded: true,
                 product1_id: response.data[0].id,
@@ -287,8 +290,8 @@ export default class Map extends Component {
           )
           .then(response => {
             {
-              console.log("Taxes2==>"+response.data[0].taxes_id);
-              this.setState({                
+              console.log("Taxes2==>" + response.data[0].taxes_id);
+              this.setState({
                 product2_id: response.data[0].id,
                 taxes2_id: response.data[0].taxes_id
               });
@@ -314,10 +317,10 @@ export default class Map extends Component {
             context
           )
           .then(response => {
-            console.log(response)            
+            console.log(response)
           })
           .catch(e => {
-            console.log(e)            
+            console.log(e)
             this.setState({ trans: false });
           });
         await odoo
@@ -341,12 +344,12 @@ export default class Map extends Component {
             ],
             context
           )
-          .then(response => {            
+          .then(response => {
           })
           .catch(e => {
             console.log(e);
             this.setState({ trans: false });
-            
+
           });
         await odoo
           .create(
@@ -363,22 +366,22 @@ export default class Map extends Component {
             context
           )
           .then(response => {
-            
-              this.deleteUser(user_cedula);
-              this.refs.toast.show("Información facturada", 1500);
-            
-            
+
+            this.deleteUser(user_cedula);
+            this.refs.toast.show("Información facturada", 1500);
+
+
           })
           .catch(e => {
             console.log(e);
             this.setState({ loaded: true, trans: true });
           });
-        
-     /* } else {
-        this.refs.toast.show("Problemas con la comunicación", 1500);
-      }*/
-    } catch (e) {}
-    } catch (e) {}
+
+        /* } else {
+           this.refs.toast.show("Problemas con la comunicación", 1500);
+         }*/
+      } catch (e) { }
+    } catch (e) { }
   }
 
   deleteUser = cedula => {
@@ -437,15 +440,19 @@ export default class Map extends Component {
   async sincronizar() {
     var temp1 = [];
     console.log("Sincronizar");
+    this.setState({
+      loaded: false,
+    })
+
     this.CheckConnectivity();
     if (this.state.online) {
       this.view_config();
       db.transaction(tx => {
         tx.executeSql("SELECT * FROM table_user", [], (tx, results1) => {
-          
+
           for (let i = 0; i < results1.rows.length; ++i) {
             temp1.push(results1.rows.item(i));
-            console.log("For============>"+i)            
+            console.log("For============>" + i)
             this.facturar(
               temp1[i].user_cedula,
               temp1[i].user_name,
@@ -464,9 +471,12 @@ export default class Map extends Component {
         });
       });
 
-      
+
     } else {
       alert("Conectese a internet");
+      this.setState({
+        loaded: true,
+      })
     }
   }
 
@@ -480,7 +490,7 @@ export default class Map extends Component {
   render() {
     const { loaded } = this.state;
     if (!loaded) {
-      return <PreLoader />;
+      return (<PreLoader />);
     } else {
       return (
         <View style={styles.viewBody}>
@@ -519,11 +529,11 @@ export default class Map extends Component {
                 <Text style={styles.name}>
                   Subsidio:{" "}
                   <Text style={styles.label}>{item.user_subsidio} </Text>{" "}
-                </Text>                
+                </Text>
                 <Button
                   buttonStyle={styles.buttonLoginContainer}
                   title="Eliminar"
-                  onPress={() => this.deleteUser(item.user_cedula)}
+                  onPress={() => this.deleteUser(item.user_id)}
                 />
               </View>
             )}

@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { StyleSheet, View, Text, SafeAreaView, ScrollView, Alert, NetInfo, Platform } from "react-native"
+import { StyleSheet, View, Text, AsyncStorage, ScrollView, Alert, NetInfo, Platform,TouchableOpacity } from "react-native"
 import Odoo from 'react-native-odoo-promise-based'
 import * as SQLite from 'expo-sqlite';
 import { Button, Input, Card } from "react-native-elements";
@@ -16,7 +16,7 @@ export default class Home extends Component {
   constructor(props) {
     super(props)
     this.state = {
-      online:false,
+      online: false,
       facturaStruct: FacturaStruct,
       facturaOptions: FacturaOptions,
       facturaData: {
@@ -30,8 +30,8 @@ export default class Home extends Component {
         names: '',
         lastnames: '',
         cedula: '',
-        email:"",
-        phone:""
+        email: "",
+        phone: ""
       },
       tableHead: ['Descripción', 'Cantidad', 'Total'],
       tableData: "",
@@ -46,45 +46,31 @@ export default class Home extends Component {
       loaded: true,
       visible: false,
       overlayComponent: null,
+      sugerido: "",
     };
 
   }
-    async componentDidMount() {
-
-      db.transaction(tx => {
-        tx.executeSql("SELECT * FROM table_partner where partner_cedula = ?", [], (tx, results) => {
-          if (results.rows.length == 0) {
-            tx.executeSql('DROP TABLE IF EXISTS table_partner', []);
-            tx.executeSql(
-              'CREATE TABLE IF NOT EXISTS table_partner(partner_id INTEGER PRIMARY KEY AUTOINCREMENT,partner_cedula VARCHAR(20),partner_name VARCHAR(40), partner_lastname VARCHAR(40),partner_email VARCHAR(40), partner_phone VARCHAR(40))',
-              []
-            );
-          }
-          
-        }, (error) => {      
-      });
-      });
-      db.transaction(tx => {
-        tx.executeSql("SELECT * FROM table_user", [], (tx, results) => {
-          if (results.rows.length == 0) {
-            tx.executeSql('DROP TABLE IF EXISTS table_user', []);
-            tx.executeSql(
-              'CREATE TABLE IF NOT EXISTS table_user(user_id INTEGER PRIMARY KEY AUTOINCREMENT,user_cedula VARCHAR(20),user_name VARCHAR(40), user_lastname VARCHAR(40),user_email VARCHAR(40),user_phone VARCHAR(40), user_monto VARCHAR(10),user_cantidad VARCHAR(20),user_total VARCHAR(20),user_subsidio VARCHAR(20),user_transporte VARCHAR(20),user_iva VARCHAR(20))',
-              []
-            );
-          }
-          
-        }, (error) => {      
-
-      });
-      });
-    
+  async componentDidMount() {
     this.CheckConnectivity();
+    this.getKey();
+  }
+  async getKey() {
+    console.log("en el guardar ")
+    try {
+      const value = await AsyncStorage.getItem('@MySuperStore:key');
+      console.log("el ", value)
+      this.setState({
+        sugerido: value,
+      })
+
+    } catch (error) {
+      console.log("Error retrieving data" + error);
+    }
   }
 
   CheckConnectivity = () => {
     NetInfo.isConnected.fetch().then(isConnected => {
-      isConnected ? this.setState({online:true}) : this.setState({online:false})
+      isConnected ? this.setState({ online: true }) : this.setState({ online: false })
     });
   };
 
@@ -112,13 +98,6 @@ export default class Home extends Component {
         (tx, results) => {
           var len = results.rows.length;
           console.log('len', len);
-          if (results.rows.length == 0) {
-            tx.executeSql('DROP TABLE IF EXISTS table_partner', []);
-            tx.executeSql(
-              'CREATE TABLE IF NOT EXISTS table_partner(partner_id INTEGER PRIMARY KEY AUTOINCREMENT,partner_cedula VARCHAR(20),partner_name VARCHAR(40), partner_lastname VARCHAR(40),partner_email VARCHAR(40), partner_phone VARCHAR(40))',
-              []
-            );
-          }
           if (len > 0) {
             this.setState({
               formRegistro: {
@@ -133,11 +112,10 @@ export default class Home extends Component {
             }
             )
           } else {
-            console.log("no se encuentra")            
-            console.log("online===>"+ this.state.online)
-            if(this.state.online)
-            {            
-            this.buscarOdoo();
+            console.log("no se encuentra")
+            console.log("online===>" + this.state.online)
+            if (this.state.online) {
+              this.buscarOdoo();
             }
           }
         }
@@ -232,7 +210,7 @@ export default class Home extends Component {
     }
     )
   }
-  updateUsers = (close, updateInfo, cedula, name, lastname,email, telefono) => {
+  updateUsers = (close, updateInfo, cedula, name, lastname, email, telefono) => {
     this.setState({
       overlayComponent: (
         <UpdateName
@@ -243,7 +221,7 @@ export default class Home extends Component {
           inputValueFour={telefono}
           close={close}
           insertData={updateInfo}
-          cedula={cedula}           
+          cedula={cedula}
           updateClient={this.updateClient}
         />)
     });
@@ -280,19 +258,18 @@ export default class Home extends Component {
 
 
   register_user = () => {
-    console.log("en el guardAR ")
     const {
       loaded,
       formRegistro,
       facturaData,
     } = this.state
-    /*Clientes*/ 
+    /*Clientes*/
     var partner_cedula = facturaData.cedula;
     var partner_name = formRegistro.names;
     var partner_lastname = formRegistro.lastnames;
     var partner_email = formRegistro.email;
     var partner_phone = formRegistro.phone;
-    /*Detalle*/ 
+    /*Detalle*/
     var user_name = formRegistro.names;
     var user_lastname = formRegistro.lastnames;
     var user_monto = facturaData.monto;
@@ -306,19 +283,19 @@ export default class Home extends Component {
     db.transaction(function (tx) {
       tx.executeSql(
         'INSERT INTO table_user (user_cedula,user_name,user_lastname,user_email, user_phone,user_monto,user_cantidad,user_total,user_subsidio,user_transporte,user_iva) VALUES (?,?,?,?,?,?,?,?,?,?,?)',
-        [user_cedula, user_name, user_lastname, partner_email, partner_phone,user_monto, user_cantidad, user_total, user_subsidio, user_transporte, user_iva],
+        [user_cedula, user_name, user_lastname, partner_email, partner_phone, user_monto, user_cantidad, user_total, user_subsidio, user_transporte, user_iva],
         (tx, results) => {
           console.log('Results', results.rowsAffected);
           if (results.rowsAffected > 0) {
             console.log("correcto")
-            
+
           } else {
             alert('Registro fallido');
-            
+
           }
         }, (err) => {
           console.log("e", err)
-          
+
         }
       )
     }, (error) => {
@@ -327,13 +304,13 @@ export default class Home extends Component {
       console.log("Ingreso correcto")
       this.refs.toast.show("Factura generada", 1500);
       this.setState({
-        visible: false, loaded:true
+        visible: false, loaded: true
       });
     }
     );
 
 
-/*Registar Cliente*/
+    /*Registar Cliente*/
 
     db.transaction(function (tx) {
       tx.executeSql(
@@ -343,14 +320,14 @@ export default class Home extends Component {
           console.log('Results', results.rowsAffected);
           if (results.rowsAffected > 0) {
             console.log("correcto")
-            
+
           } else {
             alert('Registro fallido');
-            
+
           }
         }, (err) => {
           console.log("e", err)
-          
+
         }
       )
     }, (error) => {
@@ -359,14 +336,10 @@ export default class Home extends Component {
       console.log("Ingreso correcto")
       this.refs.toast.show("Factura generada", 1500);
       this.setState({
-        visible: false, loaded:true
+        visible: false, loaded: true
       });
     }
     );
-
-
-
-
   }
 
   render() {
@@ -377,7 +350,8 @@ export default class Home extends Component {
       facturaData,
       visible,
       overlayComponent,
-      tableHead, tableData
+      tableHead, tableData,
+      sugerido
     } = this.state
 
     if (!loaded) {
@@ -395,15 +369,23 @@ export default class Home extends Component {
             opacity={0.8}
             textStyle={{ color: "#fff" }}
           />
-
           <ScrollView style={styles.scrollView}>
             <Form
-              ref="facturaForm"
+              ref="form"
               type={facturaStruct}
               options={facturaOptions}
               value={facturaData}
               onChange={facturaValue => this.onChangeFormFactura(facturaValue)}
             />
+            <View style={styles.container}>
+              <Text style={styles.name}>Valor sugerido: <Text style={styles.label}>{sugerido}</Text></Text>
+              <TouchableOpacity
+                onPress={this.getKey.bind(this)}
+              >
+                <Text style={styles.btnRegister} >Actualizar</Text>
+              </TouchableOpacity>
+            </View>
+
             <Button title="Buscar" onPress={() => this.buscarPersona(this.state.facturaData.cantidad, this.state.facturaData.monto)}></Button>
             {visible && (<View>
 
@@ -414,7 +396,7 @@ export default class Home extends Component {
                 <Text style={styles.name}>Correo: <Text style={styles.label}>{this.state.formRegistro.email}</Text></Text>
                 <Text style={styles.name}>Télefono: <Text style={styles.label}>{this.state.formRegistro.phone}</Text></Text>
                 <View style={styles.register}>
-                  <Text style={styles.btnRegister} onPress={() => this.updateUsers(this.close, this.updateInfo, this.state.facturaData.cedula, this.state.formRegistro.names, this.state.formRegistro.lastnames,this.state.formRegistro.email,this.state.formRegistro.phone)}>Modificar datos</Text>
+                  <Text style={styles.btnRegister} onPress={() => this.updateUsers(this.close, this.updateInfo, this.state.facturaData.cedula, this.state.formRegistro.names, this.state.formRegistro.lastnames, this.state.formRegistro.email, this.state.formRegistro.phone)}>Modificar datos</Text>
                 </View>
 
 
@@ -491,5 +473,9 @@ const styles = StyleSheet.create({
     fontSize: 14
   },
   head: { height: 40, backgroundColor: '#f1f8ff' },
-  text: { margin: 6 }
+  text: { margin: 6 },
+  container: {
+    flex: 1,
+    flexDirection: "row",
+  }
 })
