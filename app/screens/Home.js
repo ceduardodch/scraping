@@ -62,10 +62,6 @@ export default class Home extends Component {
           }
           
         }, (error) => {      
-          tx.executeSql(
-            'CREATE TABLE IF NOT EXISTS table_partner(partner_id INTEGER PRIMARY KEY AUTOINCREMENT,partner_cedula VARCHAR(20),partner_name VARCHAR(40), partner_lastname VARCHAR(40),partner_email VARCHAR(40), partner_phone VARCHAR(40))',
-            []
-          );
       });
       });
       db.transaction(tx => {
@@ -79,10 +75,7 @@ export default class Home extends Component {
           }
           
         }, (error) => {      
-          tx.executeSql(
-            'CREATE TABLE IF NOT EXISTS table_partner(partner_id INTEGER PRIMARY KEY AUTOINCREMENT,partner_cedula VARCHAR(20),partner_name VARCHAR(40), partner_lastname VARCHAR(40),partner_email VARCHAR(40), partner_phone VARCHAR(40))',
-            []
-          );
+
       });
       });
     
