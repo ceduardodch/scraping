@@ -234,7 +234,7 @@ export default class Map extends Component {
         const dataFact = {
           partner_id: partner_id,
           type: "out_invoice",
-          date_invoice: f.getDate() + "/" + month + "/" + f.getFullYear(),
+          date_invoice:  f.getFullYear() + "-" + month + "-" +f.getDate(),
           total: user_total,
           montoiva: user_iva,
           baseimpgrav: user_cantidad * 1.6,
@@ -369,7 +369,7 @@ export default class Map extends Component {
           .then(response => {
 
             this.deleteUser(user_id);
-            this.refs.toast.show("Información facturada", 1500);
+            
             this.setState({ loaded: true });
 
 
@@ -378,7 +378,7 @@ export default class Map extends Component {
             console.log(e);
             this.setState({ loaded: true, trans: true });
           });
-
+          this.refs.toast.show("Información facturada", 1500);
         /* } else {
            this.refs.toast.show("Problemas con la comunicación", 1500);
          }*/
