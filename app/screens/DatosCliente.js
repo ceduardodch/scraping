@@ -268,7 +268,7 @@ const styles = StyleSheet.create({
   formInput: {
     paddingLeft: 5,
     borderWidth: 1,
-    height: 35,
+    height: 30,
     borderColor: "#555555",
     backgroundColor: "#ffffff",
   },

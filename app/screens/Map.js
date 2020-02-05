@@ -370,7 +370,7 @@ export default class Map extends Component {
 
             this.deleteUser(user_id);
             this.refs.toast.show("Información facturada", 1500);
-
+            this.setState({ loaded: true });
 
           })
           .catch(e => {
@@ -381,8 +381,12 @@ export default class Map extends Component {
         /* } else {
            this.refs.toast.show("Problemas con la comunicación", 1500);
          }*/
-      } catch (e) { }
-    } catch (e) { }
+      } catch (e) {
+        this.setState({ loaded: true });
+       }
+    } catch (e) { 
+      this.setState({ loaded: true });
+    }
   }
 
   deleteUser = cedula => {
@@ -444,7 +448,6 @@ export default class Map extends Component {
     this.setState({
       loaded: false,
     })
-
     this.CheckConnectivity();
     if (this.state.online) {
       this.view_config();
@@ -469,7 +472,7 @@ export default class Map extends Component {
               temp1[i].user_id,
             );
           }
-          this.setState({ loaded: true });
+         
         });
       });
 
