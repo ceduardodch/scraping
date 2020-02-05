@@ -22,7 +22,7 @@ export default class Home extends Component {
       facturaData: {
         cedula: "",
         cantidad: "",
-        monto: ""
+        monto: 1.6
       },
       facturaErrorMessage: "",
 
@@ -397,6 +397,7 @@ export default class Home extends Component {
           />
 
           <ScrollView style={styles.scrollView}>
+            
             <Form
               ref="facturaForm"
               type={facturaStruct}
