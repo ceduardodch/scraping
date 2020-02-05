@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { StyleSheet, View, Text, AsyncStorage, ScrollView, Alert, NetInfo, Platform,TouchableOpacity } from "react-native"
+import { StyleSheet, View, Text, AsyncStorage, ScrollView, Alert, NetInfo, Platform, TouchableOpacity } from "react-native"
 import Odoo from 'react-native-odoo-promise-based'
 import * as SQLite from 'expo-sqlite';
 import { Button, Input, Card } from "react-native-elements";
@@ -61,6 +61,9 @@ export default class Home extends Component {
       console.log("el ", value)
       this.setState({
         sugerido: value,
+        facturaData: {
+          monto: value
+        },
       })
 
     } catch (error) {
@@ -476,6 +479,8 @@ const styles = StyleSheet.create({
   text: { margin: 6 },
   container: {
     flex: 1,
+    marginBottom:3,
     flexDirection: "row",
+    justifyContent: "space-between",
   }
 })

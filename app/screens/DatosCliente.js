@@ -38,24 +38,25 @@ export default class DatosCliente extends Component {
     this.getKey();
   }
   async guardarKey(value) {
-    console.log("en el gyuardar ")
+    console.log("va", value)
+    /* try {
+       await AsyncStorage.setItem('@MySuperStore:key', value);
+     } catch (error) {
+       console.log("Error saving data" + error);
+     }*/
+    this.setState({ myKey: value });
+
+  }
+  async guardarKeyUno() {
+
     try {
-      await AsyncStorage.setItem('@MySuperStore:key', value);
+      await AsyncStorage.setItem('@MySuperStore:key', this.state.myKey);
+      this.refs.toast.show("Dato almacenado", 1500);
     } catch (error) {
       console.log("Error saving data" + error);
     }
-
   }
 
-  async resetKey() {
-    try {
-      await AsyncStorage.removeItem('@MySuperStore:key');
-      const value = await AsyncStorage.getItem('@MySuperStore:key');
-      this.setState({ myKey: value });
-    } catch (error) {
-      console.log("Error resetting data" + error);
-    }
-  }
   async getKey() {
     console.log("en el guardar ")
     try {
@@ -91,34 +92,13 @@ export default class DatosCliente extends Component {
 
     })
     this.props.navigation.navigate("Login")
-    /*db.transaction(tx => {
-      tx.executeSql('DROP TABLE  table_user_datos',[], (tx, results) => {
-        console.log("Results ==========>", results.rowsAffected);
-        if (results.rowsAffected > 0) {
-          this.props.navigation.navigate("Login")
-        } else {
-          Console.log("No borra")
-        }
-      });
-    });
-    db.transaction(tx => {
-      tx.executeSql('DROP TABLE table_user',[], (tx, results) => {
-        console.log("Results ==========>", results.rowsAffected);
-        if (results.rowsAffected > 0) {
-          this.props.navigation.navigate("Login")
-        } else {
-          Console.log("No borra")
-        }
-      });
-    });*/
+
   };
   onChangeFormFactura = facturaValue => {
 
     this.setState({
       facturaRegistro: facturaValue
     });
-    console.log(facturaValue);
-    console.log("qaaaa" + this.state.facturaRegistro.url)
   };
 
   ListViewItemSeparator = () => {
@@ -134,6 +114,7 @@ export default class DatosCliente extends Component {
       facturaOptions,
       facturaStruct,
       facturaRegistro,
+      myKey
     } = this.state
 
     return (
@@ -152,12 +133,12 @@ export default class DatosCliente extends Component {
           <View style={styles.container}>
             <TextInput
               style={styles.formInput}
-              placeholder="Valor sugerido"
-              value={this.state.myKey}
+              placeholder="  Valor sugerido  " 
+              value={myKey}
               onChangeText={(value) => this.guardarKey(value)}
             />
             <TouchableOpacity
-              onPress={this.resetKey.bind(this)}
+              onPress={this.guardarKeyUno.bind(this)}
             >
               <Text style={styles.btnRegister} >Almacenar</Text>
             </TouchableOpacity>
@@ -294,11 +275,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     flexDirection: "row",
+    justifyContent: "space-between",
     padding: 15,
-    marginBottom: 10,
-    marginLeft: 14,
-    marginTop: 10,
-    marginRight: 14,
-    justifyContent: "space-between"
   },
 })
