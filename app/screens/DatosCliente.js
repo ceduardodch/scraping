@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { StyleSheet, View, Text, SafeAreaView, ScrollView, Alert, FlatList, TouchableOpacity } from "react-native"
+import { StyleSheet, View, Text, AsyncStorage, ScrollView, TextInput, FlatList, TouchableOpacity, KeyboardAvoidingView, } from "react-native"
 import Odoo from 'react-native-odoo-promise-based'
 import * as SQLite from 'expo-sqlite';
 import { Button, Input, Card, Divider } from "react-native-elements";
@@ -27,134 +27,52 @@ export default class DatosCliente extends Component {
       url: "",
       name: "",
       password: "",
+      myKey: null,
 
     };
   }
 
   async componentDidMount() {
+
     this.view_user();
+    this.getKey();
   }
+  async guardarKey(value) {
+    console.log("va", value)
+    /* try {
+       await AsyncStorage.setItem('@MySuperStore:key', value);
+     } catch (error) {
+       console.log("Error saving data" + error);
+     }*/
+    this.setState({ myKey: value });
 
-  register_userDatos = () => {
-    console.log("en el guardAR ")
-    const {
-      facturaRegistro
-    } = this.state
-    var user_url_datos = facturaRegistro.url;
-    var user_valor_datos = facturaRegistro.valor;
-    var user_subsidio_datos = facturaRegistro.subsidio;
-    var user_id_datos = 1;
-    var user_contrasena_datos = this.state.password;
-    var user_usuario_datos = this.state.name;
-    console.log("probar", this.state.url)
-    console.log("luego en traccasion", user_url_datos, "gg", user_valor_datos, "gf", user_subsidio_datos);
-    console.log("con", user_contrasena_datos, "uu", user_usuario_datos)
-    user_contrasena_datos = "contra"
-    if (user_url_datos && user_valor_datos && user_subsidio_datos) {
-      if (this.state.FlatListItems.length === 0) {
-        db.transaction(function (tx) {
-          tx.executeSql(
-            'INSERT INTO table_user_datos (user_contrasena_datos,user_usuario_datos,user_url_datos,user_valor_datos,user_subsidio_datos) VALUES (?,?,?,?,?)',
-            [user_contrasena_datos, user_usuario_datos, user_url_datos, user_valor_datos, user_subsidio_datos],
-            (tx, results) => {
-              console.log('Results', results.rowsAffected);
-              if (results.rowsAffected > 0) {
-                console.log("correcto datos")
-              } else {
-                alert('Registro fallido');
-              }
-            }, (err) => {
-              console.log("error", err)
-            }
-          )
-        }, (error) => {
-          console.log("error en la base: " + error)
-        }, (success) => {
-          console.log("Ingreso correcto")
-          this.refs.toast.show("Información ingresada", 1500);
-        }
-        );
+  }
+  async guardarKeyUno() {
 
-      } else {
-        db.transaction((tx) => {
-          tx.executeSql(
-            'UPDATE table_user_datos set user_valor_datos=?, user_subsidio_datos=? where user_id_datos=?',
-            [user_valor_datos, user_subsidio_datos, user_id_datos],
-            (tx, results) => {
-              console.log('Results', results.rowsAffected);
-              if (results.rowsAffected > 0) {
-                console.log("modificado")
-                this.refs.toast.show("Información ingresada", 1500);
-              } else {
-                console.log("no se puede modificar");
-              }
-            }
-          );
-        });
-      }
-    } else {
-      alert('Ingresar todos los campos');
+    try {
+      await AsyncStorage.setItem('@MySuperStore:key', this.state.myKey);
+      this.refs.toast.show("Dato almacenado", 1500);
+    } catch (error) {
+      console.log("Error saving data" + error);
     }
-
-    /*
-        db.transaction(function (tx) {
-          tx.executeSql(
-            'INSERT INTO table_user_datos (user_url_datos,user_valor_datos,user_subsidio_datos) VALUES (?,?,?)',
-            [user_url_datos, user_valor_datos, user_subsidio_datos],
-            (tx, results) => {
-              console.log('Results', results.rowsAffected);
-              if (results.rowsAffected > 0) {
-                console.log("correcto datos")
-              } else {
-                alert('Registro fallido');
-              }
-            }, (err) => {
-              console.log("error", err)
-            }
-          )
-        }, (error) => {
-          console.log("error en la base: " + error)
-        }, (success) => {
-          console.log("Ingreso correcto")
-          this.refs.toast.show("Información ingresada", 1500);
-        }
-        );*/
-  };
-  update_user = () => {
-    const {
-      facturaRegistro
-    } = this.state
-    var user_url_datos = facturaRegistro.url;
-    var user_valor_datos = facturaRegistro.valor;
-    var user_subsidio_datos = facturaRegistro.subsidio;
-    var user_id_datos = 1;
-    db.transaction((tx) => {
-      tx.executeSql(
-        'UPDATE table_user_datos set user_valor_datos=?, user_subsidio_datos=? where user_id_datos=?',
-        [user_valor_datos, user_subsidio_datos, user_id_datos],
-        (tx, results) => {
-          console.log('Results', results.rowsAffected);
-          if (results.rowsAffected > 0) {
-            console.log("modificado")
-            this.refs.toast.show("Información ingresada", 1500);
-          } else {
-            console.log("no se puede modificar");
-          }
-        }
-      );
-    });
   }
 
-
-
+  async getKey() {
+    console.log("en el guardar ")
+    try {
+      const value = await AsyncStorage.getItem('@MySuperStore:key');
+      console.log("el ", value)
+      this.setState({ myKey: value });
+    } catch (error) {
+      console.log("Error retrieving data" + error);
+    }
+  }
   view_user = () => {
-    console.log("ddddggggggggg")
     db.transaction(tx => {
       tx.executeSql("SELECT * FROM table_user_datos", [], (tx, results) => {
         var temp = [];
         for (let i = 0; i < results.rows.length; ++i) {
           temp.push(results.rows.item(i));
-          console.log("waq")
         }
         console.log("etststst");
         this.setState({
@@ -169,39 +87,18 @@ export default class DatosCliente extends Component {
   deleteUser = () => {
     console.log("volver")
     db.transaction(function (txn) {
-    txn.executeSql('DROP TABLE IF EXISTS table_user', []);
-    txn.executeSql('DROP TABLE IF EXISTS table_user_datos', []);
-    
+      txn.executeSql('DROP TABLE IF EXISTS table_user', []);
+      txn.executeSql('DROP TABLE IF EXISTS table_user_datos', []);
+
     })
     this.props.navigation.navigate("Login")
-    /*db.transaction(tx => {
-      tx.executeSql('DROP TABLE  table_user_datos',[], (tx, results) => {
-        console.log("Results ==========>", results.rowsAffected);
-        if (results.rowsAffected > 0) {
-          this.props.navigation.navigate("Login")
-        } else {
-          Console.log("No borra")
-        }
-      });
-    });
-    db.transaction(tx => {
-      tx.executeSql('DROP TABLE table_user',[], (tx, results) => {
-        console.log("Results ==========>", results.rowsAffected);
-        if (results.rowsAffected > 0) {
-          this.props.navigation.navigate("Login")
-        } else {
-          Console.log("No borra")
-        }
-      });
-    });*/
+
   };
   onChangeFormFactura = facturaValue => {
 
     this.setState({
       facturaRegistro: facturaValue
     });
-    console.log(facturaValue);
-    console.log("qaaaa" + this.state.facturaRegistro.url)
   };
 
   ListViewItemSeparator = () => {
@@ -217,11 +114,12 @@ export default class DatosCliente extends Component {
       facturaOptions,
       facturaStruct,
       facturaRegistro,
+      myKey
     } = this.state
 
     return (
-
       <View style={styles.viewBody}>
+
         <Toast
           ref="toast"
           position="center"
@@ -232,25 +130,31 @@ export default class DatosCliente extends Component {
           textStyle={{ color: "#fff" }}
         />
         <ScrollView style={styles.scrollView}>
-          {/*
-          <Form
-            ref="connectClientForm"
-            type={facturaStruct}
-            options={facturaOptions}
-            value={facturaRegistro}
-            onChange={facturaValue => this.onChangeFormFactura(facturaValue)}
-          />
-          <Button style={styles.button} title="Ingresar" onPress={() => this.update_user()}></Button>
-          */}
-
-
-          <View style={styles.register}>
+          <View style={styles.container}>
+            <TextInput
+              style={styles.formInput}
+              placeholder="  Valor sugerido  " 
+              value={myKey}
+              onChangeText={(value) => this.guardarKey(value)}
+            />
+            <TouchableOpacity
+              onPress={this.guardarKeyUno.bind(this)}
+            >
+              <Text style={styles.btnRegister} >Almacenar</Text>
+            </TouchableOpacity>
+          </View>
+          {
+            /*
+              <View style={styles.register}>
             <TouchableOpacity
               onPress={this.view_user}
             >
               <Text style={styles.btnRegister} >Ver datos</Text>
             </TouchableOpacity>
           </View>
+            */
+          }
+
           <View>
             <FlatList
               data={this.state.FlatListItems}
@@ -284,18 +188,17 @@ export default class DatosCliente extends Component {
                     SUBSIDIO: <Text style={styles.label}>{item.user_subsidio_datos}</Text>
                   </Text>
                   <Divider style={styles.divider}></Divider>
-                  <Button
-                    buttonStyle={styles.buttonLoginContainer}
-                    title="Salir"
-                    onPress={() => this.deleteUser()}
-                  />
+
                 </View>
               )}
             />
 
           </View>
-
-
+          <Button
+            buttonStyle={styles.buttonLoginContainer}
+            title="Salir"
+            onPress={() => this.deleteUser()}
+          />
         </ScrollView>
 
       </View>
@@ -361,5 +264,18 @@ const styles = StyleSheet.create({
     backgroundColor: "#00a680",
     marginBottom: 20,
     marginTop: 5
+  },
+  formInput: {
+    paddingLeft: 5,
+    borderWidth: 1,
+    height: 30,
+    borderColor: "#555555",
+    backgroundColor: "#ffffff",
+  },
+  container: {
+    flex: 1,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    padding: 15,
   },
 })
