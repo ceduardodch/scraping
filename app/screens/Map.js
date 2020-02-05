@@ -56,7 +56,8 @@ export default class Map extends Component {
     user_total,
     user_subsidio,
     user_transporte,
-    user_iva
+    user_iva,
+    user_id
   ) {
     try {
       let account_id
@@ -367,7 +368,7 @@ export default class Map extends Component {
           )
           .then(response => {
 
-            this.deleteUser(user_cedula);
+            this.deleteUser(user_id);
             this.refs.toast.show("Información facturada", 1500);
 
 
@@ -388,7 +389,7 @@ export default class Map extends Component {
     console.log("eliminar ==========> " + cedula);
     db.transaction(tx => {
       tx.executeSql(
-        "DELETE FROM  table_user where user_cedula=?",
+        "DELETE FROM  table_user where user_id=?",
         [cedula],
         (tx, results) => {
           console.log("Results ==========>", results.rowsAffected);
@@ -464,7 +465,8 @@ export default class Map extends Component {
               temp1[i].user_total,
               temp1[i].user_subsidio,
               temp1[i].user_transporte,
-              temp1[i].user_iva
+              temp1[i].user_iva,
+              temp1[i].user_id,
             );
           }
           this.setState({ loaded: true });
