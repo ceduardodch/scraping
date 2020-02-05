@@ -372,6 +372,7 @@ export default class Map extends Component {
             this.refs.toast.show("Información facturada", 1500);
             this.setState({ loaded: true });
 
+
           })
           .catch(e => {
             console.log(e);
@@ -383,8 +384,8 @@ export default class Map extends Component {
          }*/
       } catch (e) {
         this.setState({ loaded: true });
-       }
-    } catch (e) { 
+      }
+    } catch (e) {
       this.setState({ loaded: true });
     }
   }
@@ -472,7 +473,7 @@ export default class Map extends Component {
               temp1[i].user_id,
             );
           }
-         
+
         });
       });
 
