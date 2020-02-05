@@ -399,7 +399,7 @@ export default class Map extends Component {
         (tx, results) => {
           console.log("Results ==========>", results.rowsAffected);
           if (results.rowsAffected > 0) {
-            this.refs.toast.show("Información enviada a odoo", 1500);
+            this.refs.toast.show("Factura eliminada", 1500);
             this.view_user();
           } else {
             alert("Error al enviar");

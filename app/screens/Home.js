@@ -55,7 +55,6 @@ export default class Home extends Component {
     this.getKey();
   }
   async getKey() {
-    console.log("en el guardar ")
     try {
       const value = await AsyncStorage.getItem('@MySuperStore:key');
       console.log("el ", value)
@@ -124,7 +123,12 @@ export default class Home extends Component {
         }
       );
     }, (error) => {
+      this.refs.toast.show("Error en la base", 1500);
       console.log("error en la base: " + error);
+      this.setState({
+        loaded: true,
+      }
+      )
     }, (success) => {
       console.log("correcto");
     }
@@ -381,7 +385,7 @@ export default class Home extends Component {
               onChange={facturaValue => this.onChangeFormFactura(facturaValue)}
             />
             <View style={styles.container}>
-              <Text style={styles.name}>Valor sugerido: <Text style={styles.label}>{sugerido}</Text></Text>
+              <Text style={styles.name}>Valor sugerido: $<Text style={styles.label}>{sugerido}</Text></Text>
               <TouchableOpacity
                 onPress={this.getKey.bind(this)}
               >
@@ -479,7 +483,7 @@ const styles = StyleSheet.create({
   text: { margin: 6 },
   container: {
     flex: 1,
-    marginBottom:3,
+    marginBottom: 3,
     flexDirection: "row",
     justifyContent: "space-between",
   }
