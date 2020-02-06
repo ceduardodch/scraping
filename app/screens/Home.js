@@ -71,6 +71,7 @@ export default class Home extends Component {
   }
 
   CheckConnectivity = () => {
+    console.log("no busca")
     NetInfo.isConnected.fetch().then(isConnected => {
       isConnected ? this.setState({ online: true }) : this.setState({ online: false })
     });
@@ -79,7 +80,6 @@ export default class Home extends Component {
 
   async buscarPersona(cantidad, monto) {
     this.CheckConnectivity();
-    console.log("buscar")
     this.setState({
       loaded: false,
       tableData: [
@@ -92,7 +92,7 @@ export default class Home extends Component {
     }
     );
     const { formRegistro, facturaData: { cedula } } = this.state;
-    console.log("sw")
+    console.log("tiene inter", this.state.online)
     db.transaction(tx => {
       tx.executeSql(
         'SELECT * FROM table_partner where partner_cedula = ?',
@@ -114,14 +114,17 @@ export default class Home extends Component {
             }
             )
           } else {
-            console.log("no se encuentra")
-            console.log("online===>" + this.state.online)
             if (this.state.online) {
               this.buscarOdoo();
             }
           }
+        }, (tx, err) => {
+          this.setState({
+            loaded: true,
+          }
+          )
         }
-      );
+      )
     }, (error) => {
       this.refs.toast.show("Error en la base", 1500);
       console.log("error en la base: " + error);
@@ -129,12 +132,8 @@ export default class Home extends Component {
         loaded: true,
       }
       )
-    }, (success) => {
-      console.log("correcto");
     }
     );
-    console.log("sss")
-    //this.setState({loaded:true, visible:true})
   }
   buscarOdoo() {
     this.buscarPersonaOdoo();
@@ -377,7 +376,7 @@ export default class Home extends Component {
             textStyle={{ color: "#fff" }}
           />
           <ScrollView style={styles.scrollView}>
-            
+
             <Form
               ref="form"
               type={facturaStruct}

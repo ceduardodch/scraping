@@ -31,7 +31,7 @@ export default class Map extends Component {
         "SELECT name FROM sqlite_master WHERE type='table' AND name='table_user_datos'",
         [],
         function (tx, res) {
-          console.log('itemdatos:', res.rows.length);
+          console.log('item datos:', res.rows.length);
           if (res.rows.length == 0) {
             txn.executeSql('DROP TABLE IF EXISTS table_user_datos', []);
             txn.executeSql(
@@ -49,7 +49,7 @@ export default class Map extends Component {
         "SELECT name FROM sqlite_master WHERE type='table' AND name='table_user'",
         [],
         function (tx, res) {
-          console.log('item:', res.rows.length);
+          console.log('item user:', res.rows.length);
           if (res.rows.length == 0) {
             txn.executeSql('DROP TABLE IF EXISTS table_user', []);
             txn.executeSql(
@@ -68,7 +68,7 @@ export default class Map extends Component {
         "SELECT name FROM table_partner WHERE type='table' AND name='table_partner'",
         [],
         function (tx, res) {
-          console.log('item:', res.rows.length);
+          console.log('item p:', res.rows.length);
           if (res.rows.length == 0) {
             txn.executeSql('DROP TABLE IF EXISTS table_partner', []);
             txn.executeSql(
