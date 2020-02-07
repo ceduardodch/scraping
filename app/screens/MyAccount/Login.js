@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { StyleSheet, View, ScrollView, KeyboardAvoidingView, SliderComponent } from "react-native";
+import { StyleSheet, View, ScrollView, KeyboardAvoidingView, SliderComponent, Alert } from "react-native";
 import { Image, Button } from "react-native-elements";
 import t from "tcomb-form-native";
 import { LoginStruct, LoginOptions } from "../../forms/Login";
@@ -128,7 +128,7 @@ export default class Map extends Component {
     } else {
       Alert.alert(
         'Fallo en el login',
-        'Usuario o clave incorrectos'
+        'Usuario o clave incorrectos',
         [
           {
             text: 'Aceptar',
@@ -136,7 +136,7 @@ export default class Map extends Component {
           }
         ],
         { cancelable: false }
-      )
+      );
     }
 
   }
@@ -160,9 +160,10 @@ export default class Map extends Component {
           this.props.navigation.navigate("Datos");
         }
         else {
-      
+
           Alert.alert(
-            'Usuario o clave incorrectos'
+            'Fallo en el login',
+            'Usuario o clave incorrectos',
             [
               {
                 text: 'Aceptar',
@@ -253,7 +254,7 @@ export default class Map extends Component {
         </View>
       </KeyboardAvoidingView>
     );
-    
+
   }
 }
 

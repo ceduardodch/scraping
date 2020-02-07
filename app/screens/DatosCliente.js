@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { StyleSheet, View, Text, AsyncStorage, ScrollView, TextInput, FlatList, TouchableOpacity, KeyboardAvoidingView, } from "react-native"
+import { StyleSheet, View, Text, AsyncStorage, ScrollView,  Alert,TextInput, FlatList, TouchableOpacity, KeyboardAvoidingView, } from "react-native"
 import Odoo from 'react-native-odoo-promise-based'
 import * as SQLite from 'expo-sqlite';
 import { Button, Input, Card, Divider } from "react-native-elements";
@@ -83,7 +83,25 @@ export default class DatosCliente extends Component {
     });
 
   };
-
+  confirmationInsert = () => {
+    console.log("confirmacion");
+    Alert.alert(
+      'Salir',
+      '¿Esta seguro que desea salir?',
+      [
+        {
+          text: 'Cancelar',
+          onPress: () => console.log('Cancel Pressed'),
+          style: 'cancel',
+        },
+        {
+          text: 'Aceptar',
+          onPress: () => this.deleteUser()
+        }
+      ],
+      { cancelable: false }
+    );
+  }
   deleteUser = () => {
     console.log("volver")
     db.transaction(function (txn) {
@@ -197,7 +215,7 @@ export default class DatosCliente extends Component {
           <Button
             buttonStyle={styles.buttonLoginContainer}
             title="Salir"
-            onPress={() => this.deleteUser()}
+            onPress={() => this.confirmationInsert()}
           />
         </ScrollView>
 
