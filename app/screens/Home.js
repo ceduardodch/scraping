@@ -89,11 +89,10 @@ export default class Home extends Component {
         ['', 'Total', Number(cantidad * monto).toFixed(2)],
         ['', '', ''],
         ['', 'Subsidio', Number(cantidad * 0.51122 * 15).toFixed(2)],],
-    }
-    );
-    const { formRegistro, facturaData: { cedula} } = this.state;
+    });
+    const { formRegistro, facturaData: { cedula } } = this.state;
     console.log("tiene inter", this.state.online)
-  
+
     db.transaction(tx => {
       tx.executeSql(
         'SELECT * FROM table_partner where partner_cedula = ?',
@@ -115,6 +114,7 @@ export default class Home extends Component {
             }
             )
           } else {
+            console.log("internet",this.state.online)
             if (this.state.online) {
               this.buscarOdoo();
             } else {
@@ -129,10 +129,13 @@ export default class Home extends Component {
                 { cancelable: false }
               );
               this.setState({
+                formRegistro: {
+                  cedula: cedula,
+                },
                 loaded: true,
+                visible: true
               })
             }
-
           }
         }, (tx, err) => {
           this.setState({
@@ -145,8 +148,7 @@ export default class Home extends Component {
       this.refs.toast.show("Error en la base", 1500);
       this.setState({
         loaded: true,
-      }
-      )
+      })
     }
     );
   }

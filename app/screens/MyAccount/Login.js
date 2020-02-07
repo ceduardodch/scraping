@@ -126,7 +126,17 @@ export default class Map extends Component {
       this.buscarPersonaOdoo();
 
     } else {
-      console.log("no existe")
+      Alert.alert(
+        'Fallo en el login',
+        'Usuario o clave incorrectos'
+        [
+          {
+            text: 'Aceptar',
+            onPress: () => console.log("ok")
+          }
+        ],
+        { cancelable: false }
+      )
     }
 
   }
@@ -150,7 +160,17 @@ export default class Map extends Component {
           this.props.navigation.navigate("Datos");
         }
         else {
-          alert("Usuario o clave incorrectos");
+      
+          Alert.alert(
+            'Usuario o clave incorrectos'
+            [
+              {
+                text: 'Aceptar',
+                onPress: () => console.log("ok")
+              }
+            ],
+            { cancelable: false }
+          );
         }
       })
       .catch(e => { alert(e); })
@@ -159,7 +179,6 @@ export default class Map extends Component {
     const { password, url, usuario } = this.state.loginData;
     var user_valor_datos = "1.60";
     var user_subsidio_datos = "7.66";
-
     db.transaction(function (tx) {
       tx.executeSql(
         'INSERT INTO table_user_datos (user_contrasena_datos,user_usuario_datos,user_url_datos,user_valor_datos,user_subsidio_datos) VALUES (?,?,?,?,?)',
@@ -191,9 +210,7 @@ export default class Map extends Component {
       loginOptions,
       loginStruct,
       loginData,
-      loginErrorMessage
     } = this.state;
-
     return (
       <KeyboardAvoidingView style={styles.viewBodyKeyboar} behavior="padding" enabled>
         <View style={styles.viewBody}>
@@ -236,6 +253,7 @@ export default class Map extends Component {
         </View>
       </KeyboardAvoidingView>
     );
+    
   }
 }
 
