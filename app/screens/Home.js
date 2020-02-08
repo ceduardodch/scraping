@@ -119,6 +119,9 @@ export default class Home extends Component {
             if (this.state.online) {
               this.buscarOdoo();
             }
+            else{
+            this.setState({loaded:true})
+          }
           }
         }
       );
