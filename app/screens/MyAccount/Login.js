@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { StyleSheet, View, ScrollView, KeyboardAvoidingView, SliderComponent } from "react-native";
+import { StyleSheet, View, ScrollView, KeyboardAvoidingView, SliderComponent, Alert } from "react-native";
 import { Image, Button } from "react-native-elements";
 import t from "tcomb-form-native";
 import { LoginStruct, LoginOptions } from "../../forms/Login";
@@ -31,7 +31,7 @@ export default class Map extends Component {
         "SELECT name FROM sqlite_master WHERE type='table' AND name='table_user_datos'",
         [],
         function (tx, res) {
-          console.log('itemdatos:', res.rows.length);
+          console.log('item datos:', res.rows.length);
           if (res.rows.length == 0) {
             txn.executeSql('DROP TABLE IF EXISTS table_user_datos', []);
             txn.executeSql(
@@ -49,7 +49,7 @@ export default class Map extends Component {
         "SELECT name FROM sqlite_master WHERE type='table' AND name='table_user'",
         [],
         function (tx, res) {
-          console.log('item:', res.rows.length);
+          console.log('item user:', res.rows.length);
           if (res.rows.length == 0) {
             txn.executeSql('DROP TABLE IF EXISTS table_user', []);
             txn.executeSql(
@@ -68,7 +68,7 @@ export default class Map extends Component {
         "SELECT name FROM table_partner WHERE type='table' AND name='table_partner'",
         [],
         function (tx, res) {
-          console.log('item:', res.rows.length);
+          console.log('item p:', res.rows.length);
           if (res.rows.length == 0) {
             txn.executeSql('DROP TABLE IF EXISTS table_partner', []);
             txn.executeSql(
@@ -126,7 +126,17 @@ export default class Map extends Component {
       this.buscarPersonaOdoo();
 
     } else {
-      console.log("no existe")
+      Alert.alert(
+        'Fallo en el login',
+        'Usuario o clave incorrectos',
+        [
+          {
+            text: 'Aceptar',
+            onPress: () => console.log("ok")
+          }
+        ],
+        { cancelable: false }
+      );
     }
 
   }
@@ -150,7 +160,18 @@ export default class Map extends Component {
           this.props.navigation.navigate("Datos");
         }
         else {
-          alert("Usuario o clave incorrectos");
+
+          Alert.alert(
+            'Fallo en el login',
+            'Usuario o clave incorrectos',
+            [
+              {
+                text: 'Aceptar',
+                onPress: () => console.log("ok")
+              }
+            ],
+            { cancelable: false }
+          );
         }
       })
       .catch(e => { alert(e); })
@@ -159,7 +180,6 @@ export default class Map extends Component {
     const { password, url, usuario } = this.state.loginData;
     var user_valor_datos = "1.60";
     var user_subsidio_datos = "7.66";
-
     db.transaction(function (tx) {
       tx.executeSql(
         'INSERT INTO table_user_datos (user_contrasena_datos,user_usuario_datos,user_url_datos,user_valor_datos,user_subsidio_datos) VALUES (?,?,?,?,?)',
@@ -191,9 +211,7 @@ export default class Map extends Component {
       loginOptions,
       loginStruct,
       loginData,
-      loginErrorMessage
     } = this.state;
-
     return (
       <KeyboardAvoidingView style={styles.viewBodyKeyboar} behavior="padding" enabled>
         <View style={styles.viewBody}>
@@ -236,6 +254,7 @@ export default class Map extends Component {
         </View>
       </KeyboardAvoidingView>
     );
+
   }
 }
 

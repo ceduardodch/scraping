@@ -42,7 +42,7 @@ export default class Map extends Component {
 
   async componentDidMount() {
     this.CheckConnectivity();
-    this.view_user();
+    // this.view_user();
   }
 
   async facturar(
@@ -70,7 +70,6 @@ export default class Map extends Component {
       console.log(user_cedula);
       console.log(user_name);
       console.log(user_lastname);
-      this.setState({ loaded: false });
       prot = this.state.url.split("://");
       datab = prot[1].split(".");
       const odoo = new Odoo({
@@ -150,8 +149,6 @@ export default class Map extends Component {
           .catch(e => {
             this.setState({ trans: false });
           });
-
-
         await odoo
           .search_read(
             "res.partner",
@@ -211,8 +208,7 @@ export default class Map extends Component {
               console.log("Taxes1==>" + response.data[0]);
               product1_id: response.data[0].id,
                 this.setState({
-                  loaded: true,
-
+                  //loaded: true,
                   taxes1_id: response.data[0].taxes_id
                 });
             }
@@ -234,7 +230,7 @@ export default class Map extends Component {
         const dataFact = {
           partner_id: partner_id,
           type: "out_invoice",
-          date_invoice:  f.getFullYear() + "-" + month + "-" +f.getDate(),
+          date_invoice: f.getFullYear() + "-" + month + "-" + f.getDate(),
           total: user_total,
           montoiva: user_iva,
           baseimpgrav: user_cantidad * 1.6,
@@ -270,7 +266,7 @@ export default class Map extends Component {
             {
               console.log("Taxes1==>" + response.data[0]);
               this.setState({
-                loaded: true,
+                // loaded: true,
                 product1_id: response.data[0].id,
                 taxes1_id: response.data[0].taxes_id
               });
@@ -368,20 +364,15 @@ export default class Map extends Component {
           )
           .then(response => {
 
-            this.deleteUser(user_id);
-            
-            this.setState({ loaded: true });
-
+            this.deleteUserOdoo(user_id);
 
           })
           .catch(e => {
             console.log(e);
             this.setState({ loaded: true, trans: true });
           });
-          this.refs.toast.show("Información facturada", 1500);
-        /* } else {
-           this.refs.toast.show("Problemas con la comunicación", 1500);
-         }*/
+        this.refs.toast.show("Información facturada", 1500);
+
       } catch (e) {
         this.setState({ loaded: true });
       }
@@ -391,15 +382,30 @@ export default class Map extends Component {
   }
 
   deleteUser = cedula => {
-    console.log("eliminar ==========> " + cedula);
     db.transaction(tx => {
       tx.executeSql(
         "DELETE FROM  table_user where user_id=?",
         [cedula],
         (tx, results) => {
-          console.log("Results ==========>", results.rowsAffected);
           if (results.rowsAffected > 0) {
+            this.view_user();
             this.refs.toast.show("Factura eliminada", 1500);
+           
+          } else {
+            alert("Error al enviar");
+          }
+        }
+      );
+    });
+  };
+  deleteUserOdoo = cedula => {
+    db.transaction(tx => {
+      tx.executeSql(
+        "DELETE FROM  table_user where user_id=?",
+        [cedula],
+        (tx, results) => {
+          if (results.rowsAffected > 0) {
+            console.log("factura eliminada")
             this.view_user();
           } else {
             alert("Error al enviar");
@@ -409,6 +415,7 @@ export default class Map extends Component {
     });
   };
   view_user = val => {
+    console.log("agggggggggggggggggggggggggggggggggggggggggggggg")
     db.transaction(tx => {
       tx.executeSql("SELECT * FROM table_user", [], (tx, results) => {
         var temp = [];
@@ -428,11 +435,9 @@ export default class Map extends Component {
   view_config() {
     db.transaction(tx => {
       tx.executeSql("SELECT * FROM table_user_datos", [], (tx, results) => {
-        console.log("====> viewconfig1");
         var temp1 = [];
         for (let i = 0; i < results.rows.length; ++i) {
           temp1.push(results.rows.item(i));
-          console.log("====> temp ===>" + temp1);
           this.setState({
             url: temp1[0].user_url_datos,
             user: temp1[0].user_usuario_datos,
@@ -445,7 +450,6 @@ export default class Map extends Component {
 
   async sincronizar() {
     var temp1 = [];
-    console.log("Sincronizar");
     this.setState({
       loaded: false,
     })
@@ -454,37 +458,51 @@ export default class Map extends Component {
       this.view_config();
       db.transaction(tx => {
         tx.executeSql("SELECT * FROM table_user", [], (tx, results1) => {
+          let ultimo = results1.rows.length;
+          if (results1.rows.length > 0) {
+            for (let i = 0; i < results1.rows.length; ++i) {
+              temp1.push(results1.rows.item(i));
+              this.facturar(
+                temp1[i].user_cedula,
+                temp1[i].user_name,
+                temp1[i].user_lastname,
+                temp1[i].user_email,
+                temp1[i].user_phone,
+                temp1[i].user_monto,
+                temp1[i].user_cantidad,
+                temp1[i].user_total,
+                temp1[i].user_subsidio,
+                temp1[i].user_transporte,
+                temp1[i].user_iva,
+                temp1[i].user_id,
+              );
+            }
 
-          for (let i = 0; i < results1.rows.length; ++i) {
-            temp1.push(results1.rows.item(i));
-            console.log("For============>" + i)
-            this.facturar(
-              temp1[i].user_cedula,
-              temp1[i].user_name,
-              temp1[i].user_lastname,
-              temp1[i].user_email,
-              temp1[i].user_phone,
-              temp1[i].user_monto,
-              temp1[i].user_cantidad,
-              temp1[i].user_total,
-              temp1[i].user_subsidio,
-              temp1[i].user_transporte,
-              temp1[i].user_iva,
-              temp1[i].user_id,
-            );
+          } else {
+            this.setState({
+              loaded: true,
+            })
           }
-
         });
       });
 
-
     } else {
-      alert("Conectese a internet");
+      Alert.alert(
+        'Sin conexión',
+        [
+          {
+            text: 'Aceptar',
+            onPress: () => console.log("ok")
+          }
+        ],
+        { cancelable: false }
+      );
       this.setState({
         loaded: true,
       })
     }
   }
+
 
   ListViewItemSeparator = () => {
     return (

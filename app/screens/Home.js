@@ -71,6 +71,7 @@ export default class Home extends Component {
   }
 
   CheckConnectivity = () => {
+    console.log("no busca")
     NetInfo.isConnected.fetch().then(isConnected => {
       isConnected ? this.setState({ online: true }) : this.setState({ online: false })
     });
@@ -79,7 +80,6 @@ export default class Home extends Component {
 
   async buscarPersona(cantidad, monto) {
     this.CheckConnectivity();
-    console.log("buscar")
     this.setState({
       loaded: false,
       tableData: [
@@ -89,10 +89,10 @@ export default class Home extends Component {
         ['', 'Total', Number(cantidad * monto).toFixed(2)],
         ['', '', ''],
         ['', 'Subsidio', Number(cantidad * 0.51122 * 15).toFixed(2)],],
-    }
-    );
+    });
     const { formRegistro, facturaData: { cedula } } = this.state;
-    console.log("sw")
+    console.log("tiene inter", this.state.online)
+
     db.transaction(tx => {
       tx.executeSql(
         'SELECT * FROM table_partner where partner_cedula = ?',
@@ -114,37 +114,52 @@ export default class Home extends Component {
             }
             )
           } else {
-            console.log("no se encuentra")
-            console.log("online===>" + this.state.online)
+            console.log("internet",this.state.online)
             if (this.state.online) {
               this.buscarOdoo();
+            } else {
+              Alert.alert(
+                'Sin conexión',
+                [
+                  {
+                    text: 'Aceptar',
+                    onPress: () => console.log("ok")
+                  }
+                ],
+                { cancelable: false }
+              );
+              this.setState({
+                formRegistro: {
+                  cedula: cedula,
+                },
+                loaded: true,
+                visible: true
+              })
             }
             else{
             this.setState({loaded:true})
           }
           }
+        }, (tx, err) => {
+          this.setState({
+            loaded: true,
+          }
+          )
         }
-      );
+      )
     }, (error) => {
       this.refs.toast.show("Error en la base", 1500);
-      console.log("error en la base: " + error);
       this.setState({
         loaded: true,
-      }
-      )
-    }, (success) => {
-      console.log("correcto");
+      })
     }
     );
-    console.log("sss")
-    //this.setState({loaded:true, visible:true})
   }
   buscarOdoo() {
     this.buscarPersonaOdoo();
   }
 
   async buscarPersonaOdoo() {
-    console.log("dddddxaz")
     const { formRegistro, facturaData: { cedula } } = this.state;
     const odoo = new Odoo({
       host: 'scraping.fractalsoft.ec',
@@ -166,10 +181,6 @@ export default class Home extends Component {
     }
     await odoo.search_read('scraping.registro.civil', params, context)
       .then(response => {
-        console.log("d")
-        console.log(response);
-        console.log("d1")
-        console.log(response.data.length)
         if (response.data.length > 0) {
           this.setState({
             formRegistro: {
@@ -191,7 +202,6 @@ export default class Home extends Component {
             visible: true
           }
           )
-
         }
       })
       .catch(e => {
@@ -380,7 +390,7 @@ export default class Home extends Component {
             textStyle={{ color: "#fff" }}
           />
           <ScrollView style={styles.scrollView}>
-            
+
             <Form
               ref="form"
               type={facturaStruct}

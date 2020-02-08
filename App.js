@@ -49,10 +49,10 @@ export default class App extends React.Component {
 
     db.transaction(function (txn) {
       txn.executeSql(
-        "SELECT name FROM table_partner WHERE type='table' AND name='table_partner'",
+        "SELECT name FROM sqlite_master WHERE type='table' AND name='table_partner'",
         [],
         function (tx, res) {
-          console.log('item:', res.rows.length);
+          console.log('item partner:', res.rows.length);
           if (res.rows.length == 0) {
             txn.executeSql('DROP TABLE IF EXISTS table_partner', []);
             txn.executeSql(
@@ -65,9 +65,6 @@ export default class App extends React.Component {
         }
       );
     });
-
-
-
   }
   render() {
 

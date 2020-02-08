@@ -1,13 +1,13 @@
 import React, { Component } from "react";
-import { StyleSheet, View, Text, AsyncStorage, ScrollView, TextInput, FlatList, TouchableOpacity, KeyboardAvoidingView, } from "react-native"
+import { StyleSheet, View, Text, AsyncStorage, ScrollView, Alert, TextInput, FlatList, TouchableOpacity, KeyboardAvoidingView, } from "react-native"
 import Odoo from 'react-native-odoo-promise-based'
 import * as SQLite from 'expo-sqlite';
 import { Button, Input, Card, Divider } from "react-native-elements";
 import PreLoader from "../components/PreLoader"
 import { FacturaStruct, FacturaOptions } from "../forms/ConnectClient";
 import t from "tcomb-form-native";
-import { Table, TableWrapper, Row, Rows, Col, Cols, Cell } from 'react-native-table-component';
 import Toast, { DURATION } from "react-native-easy-toast";
+import DatePicker from 'react-native-datepicker'
 const Form = t.form.Form;
 const db = SQLite.openDatabase("Factura.db");
 
@@ -28,6 +28,7 @@ export default class DatosCliente extends Component {
       name: "",
       password: "",
       myKey: null,
+      date: "2020-02-07"
 
     };
   }
@@ -83,7 +84,25 @@ export default class DatosCliente extends Component {
     });
 
   };
-
+  confirmationInsert = () => {
+    console.log("confirmacion");
+    Alert.alert(
+      'Salir',
+      '¿Esta seguro que desea salir?',
+      [
+        {
+          text: 'Cancelar',
+          onPress: () => console.log('Cancel Pressed'),
+          style: 'cancel',
+        },
+        {
+          text: 'Aceptar',
+          onPress: () => this.deleteUser()
+        }
+      ],
+      { cancelable: false }
+    );
+  }
   deleteUser = () => {
     console.log("volver")
     db.transaction(function (txn) {
@@ -130,19 +149,46 @@ export default class DatosCliente extends Component {
           textStyle={{ color: "#fff" }}
         />
         <ScrollView style={styles.scrollView}>
+          <TouchableOpacity
+            onPress={this.guardarKeyUno.bind(this)}
+          >
+            <Text style={styles.btnRegister} >Almacenar</Text>
+          </TouchableOpacity>
+         
           <View style={styles.container}>
-            <TextInput
-              style={styles.formInput}
-              placeholder="  Valor sugerido  " 
-              value={myKey}
-              onChangeText={(value) => this.guardarKey(value)}
+          <TextInput
+            style={styles.formInput}
+            placeholder="  Valor sugerido  "
+            value={myKey}
+            onChangeText={(value) => this.guardarKey(value)}
+          />
+            <DatePicker
+          
+              date={this.state.date}
+              mode="date"
+              placeholder="select date"
+              format="YYYY-MM-DD"
+              minDate="2000-01-01"
+              maxDate="2100-06-01"
+              confirmBtnText="Confirm"
+              cancelBtnText="Cancel"
+              customStyles={{
+                dateIcon: {
+                  position: 'absolute',
+                  left: 0,
+                  top: 4,
+                  marginLeft: 0
+                },
+                dateInput: {
+                  marginLeft: 36
+                }
+                // ... You can check the source to find the other keys.
+              }}
+              onDateChange={(date) => { this.setState({ date: date }) }}
             />
-            <TouchableOpacity
-              onPress={this.guardarKeyUno.bind(this)}
-            >
-              <Text style={styles.btnRegister} >Almacenar</Text>
-            </TouchableOpacity>
+
           </View>
+
           {
             /*
               <View style={styles.register}>
@@ -197,7 +243,7 @@ export default class DatosCliente extends Component {
           <Button
             buttonStyle={styles.buttonLoginContainer}
             title="Salir"
-            onPress={() => this.deleteUser()}
+            onPress={() => this.confirmationInsert()}
           />
         </ScrollView>
 
@@ -268,7 +314,7 @@ const styles = StyleSheet.create({
   formInput: {
     paddingLeft: 5,
     borderWidth: 1,
-    height: 30,
+    height: 40,
     borderColor: "#555555",
     backgroundColor: "#ffffff",
   },
