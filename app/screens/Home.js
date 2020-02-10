@@ -136,10 +136,7 @@ export default class Home extends Component {
                 visible: true
               })
             }
-            else{
-            this.setState({loaded:true})
-          }
-          }
+                      }
         }, (tx, err) => {
           this.setState({
             loaded: true,
