@@ -15,6 +15,12 @@ export default class DatosCliente extends Component {
 
   constructor(props) {
     super(props)
+    let f = new Date()
+    let month = f.getMonth() + 1;
+    if (month < 10) {
+      month = "0" + month
+    }
+    let date_invoice = f.getFullYear() + "-" + month + "-" + f.getDate();
     this.state = {
       FlatListItems: [],
       facturaStruct: FacturaStruct,
@@ -28,7 +34,9 @@ export default class DatosCliente extends Component {
       name: "",
       password: "",
       myKey: null,
-      date: "2020-02-07"
+
+      // date: "2020-02-07"
+      date: date_invoice
 
     };
   }
@@ -56,8 +64,23 @@ export default class DatosCliente extends Component {
     } catch (error) {
       console.log("Error saving data" + error);
     }
+    try {
+      await AsyncStorage.setItem('@MySuperDate:key', this.state.date);
+      this.refs.toast.show("Dato almacenado", 1500);
+    } catch (error) {
+      console.log("Error saving data" + error);
+    }
   }
-
+  /*
+    async guardarKeyFecha() {
+      try {
+        await AsyncStorage.setItem('@MySuperDate:key', this.state.date);
+        this.refs.toast.show("Dato almacenado", 1500);
+      } catch (error) {
+        console.log("Error saving data" + error);
+      }
+    }
+  */
   async getKey() {
     console.log("en el guardar ")
     try {
@@ -154,16 +177,16 @@ export default class DatosCliente extends Component {
           >
             <Text style={styles.btnRegister} >Almacenar</Text>
           </TouchableOpacity>
-         
+
           <View style={styles.container}>
-          <TextInput
-            style={styles.formInput}
-            placeholder="  Valor sugerido  "
-            value={myKey}
-            onChangeText={(value) => this.guardarKey(value)}
-          />
+            <TextInput
+              style={styles.formInput}
+              placeholder="  Valor sugerido  "
+              value={myKey}
+              onChangeText={(value) => this.guardarKey(value)}
+            />
             <DatePicker
-          
+
               date={this.state.date}
               mode="date"
               placeholder="select date"
