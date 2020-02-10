@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { StyleSheet, View, FlatList, Text, Alert, NetInfo } from "react-native";
+import { StyleSheet, View, FlatList, Text, Alert, NetInfo, AsyncStorage } from "react-native";
 import Odoo from "react-native-odoo-promise-based";
 import { Button, Icon } from "react-native-elements";
 import Toast, { DURATION } from "react-native-easy-toast";
@@ -27,7 +27,8 @@ export default class Map extends Component {
       pwd: "",
       user_id: "",
       trans: false,
-      online: false
+      online: false,
+      date: ""
     };
     this.view_user(false);
   }
@@ -221,16 +222,28 @@ export default class Map extends Component {
         /* Crear factura */
         //console.log(this.state.partner_id);
 
-        console.log("Crear cabecera");
-        let f = new Date()
-        let month = f.getMonth() + 1;
-        if (month < 10) {
-          month = "0" + month
+        /*  console.log("Crear cabecera");
+          let f = new Date()
+          let month = f.getMonth() + 1;
+          if (month < 10) {
+            month = "0" + month
+          }*/
+        try {
+          const value = await AsyncStorage.getItem('@MySuperDate:key');
+          console.log("el fff ", value)
+          this.setState({
+            date: value
+          })
+
+        } catch (error) {
+          console.log("Error retrieving data" + error);
         }
+        //  await getKey();
         const dataFact = {
           partner_id: partner_id,
           type: "out_invoice",
-          date_invoice: f.getFullYear() + "-" + month + "-" + f.getDate(),
+          //  date_invoice: f.getFullYear() + "-" + month + "-" + f.getDate(),
+          date_invoice: this.state.date,
           total: user_total,
           montoiva: user_iva,
           baseimpgrav: user_cantidad * 1.6,
@@ -381,6 +394,18 @@ export default class Map extends Component {
     }
   }
 
+  async getKey() {
+    try {
+      const value = await AsyncStorage.getItem('@MySuperDate:key');
+      console.log("el ", value)
+      this.setState({
+        date: value
+      })
+
+    } catch (error) {
+      console.log("Error retrieving data" + error);
+    }
+  }
   deleteUser = cedula => {
     db.transaction(tx => {
       tx.executeSql(
@@ -390,7 +415,7 @@ export default class Map extends Component {
           if (results.rowsAffected > 0) {
             this.view_user();
             this.refs.toast.show("Factura eliminada", 1500);
-           
+
           } else {
             alert("Error al enviar");
           }
