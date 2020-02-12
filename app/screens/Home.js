@@ -203,10 +203,14 @@ export default class Home extends Component {
         }
       })
       .catch(e => {
-        alert(e)
         this.setState({
+          formRegistro: {
+            cedula: cedula,
+          },
           loaded: true,
-        })
+          visible: true
+        }
+        )
       });
 
   }
