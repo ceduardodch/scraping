@@ -114,10 +114,17 @@ export default class Home extends Component {
             }
             )
           } else {
-            console.log("internet",this.state.online)
+            console.log("internet", this.state.online)
             if (this.state.online) {
               this.buscarOdoo();
             } else {
+              this.setState({
+                formRegistro: {
+                  cedula: cedula,
+                },
+                loaded: true,
+                visible: true
+              })
               Alert.alert(
                 'Sin conexión',
                 [
@@ -128,13 +135,7 @@ export default class Home extends Component {
                 ],
                 { cancelable: false }
               );
-              this.setState({
-                formRegistro: {
-                  cedula: cedula,
-                },
-                loaded: true,
-                visible: true
-              })
+
             }
           }
         }, (tx, err) => {

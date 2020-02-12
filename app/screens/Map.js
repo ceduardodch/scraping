@@ -218,7 +218,6 @@ export default class Map extends Component {
             this.setState({ trans: false });
           });
 
-
         /* Crear factura */
         //console.log(this.state.partner_id);
 
