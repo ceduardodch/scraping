@@ -11,6 +11,12 @@ const db = SQLite.openDatabase("Factura.db");
 export default class Map extends Component {
   constructor(props) {
     super(props);
+    let f = new Date()
+    let month = f.getMonth() + 1;
+    if (month < 10) {
+      month = "0" + month
+    }
+    let date_invoice = f.getFullYear() + "-" + month + "-" + f.getDate();
     this.state = {
       FlatListItems: [],
       partner_id: "",
@@ -28,7 +34,7 @@ export default class Map extends Component {
       user_id: "",
       trans: false,
       online: false,
-      date: ""
+      date: date_invoice
     };
     this.view_user(false);
   }
@@ -439,7 +445,6 @@ export default class Map extends Component {
     });
   };
   view_user = val => {
-    console.log("agggggggggggggggggggggggggggggggggggggggggggggg")
     db.transaction(tx => {
       tx.executeSql("SELECT * FROM table_user", [], (tx, results) => {
         var temp = [];
