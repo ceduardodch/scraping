@@ -77,8 +77,16 @@ export default class Home extends Component {
     });
   };
 
-
   async buscarPersona(cantidad, monto) {
+    if (monto == "" || monto == null) {
+      try {
+        const value = await AsyncStorage.getItem('@MySuperStore:key');
+        console.log("el ", value)
+        var monto = value;
+      } catch (error) {
+        console.log("Error retrieving data" + error);
+      }
+    }
     this.CheckConnectivity();
     this.setState({
       loaded: false,
@@ -114,10 +122,17 @@ export default class Home extends Component {
             }
             )
           } else {
-            console.log("internet",this.state.online)
+            console.log("internet", this.state.online)
             if (this.state.online) {
               this.buscarOdoo();
             } else {
+              this.setState({
+                formRegistro: {
+                  cedula: cedula,
+                },
+                loaded: true,
+                visible: true
+              })
               Alert.alert(
                 'Sin conexión',
                 [
@@ -128,13 +143,7 @@ export default class Home extends Component {
                 ],
                 { cancelable: false }
               );
-              this.setState({
-                formRegistro: {
-                  cedula: cedula,
-                },
-                loaded: true,
-                visible: true
-              })
+
             }
                       }
         }, (tx, err) => {
@@ -166,31 +175,43 @@ export default class Home extends Component {
       password: 'CarlosDiaz2013',
       protocol: 'http'
     })
-    await odoo.connect()
-      .then(response => { console.log("conecta"); })
-      .catch(e => { console.log(e); })
-    const params = {
-      domain: [["identity", "=", cedula]],
-      fields: ["names", "lastnames", "identity"],
-    }
-    const context = {
-      domain: [["id", "=", 1]],
-    }
-    await odoo.search_read('scraping.registro.civil', params, context)
-      .then(response => {
-        if (response.data.length > 0) {
-          this.setState({
-            formRegistro: {
-              names: response.data[0].names,
-              lastnames: response.data[0].lastnames,
-              cedula: response.data[0].identity,
-            },
-            loaded: true,
-            visible: true
-          }
-          )
+    try {
+      await odoo.connect()
+        .then(response => { console.log("conecta"); })
+        .catch(e => { console.log(e); })
+      const params = {
+        domain: [["identity", "=", cedula]],
+        fields: ["names", "lastnames", "identity"],
+      }
+      const context = {
+        domain: [["id", "=", 1]],
+      }
+      await odoo.search_read('scraping.registro.civil', params, context)
+        .then(response => {
+          if (response.data.length > 0) {
+            this.setState({
+              formRegistro: {
+                names: response.data[0].names,
+                lastnames: response.data[0].lastnames,
+                cedula: response.data[0].identity,
+              },
+              loaded: true,
+              visible: true
+            }
+            )
 
-        } else {
+          } else {
+            this.setState({
+              formRegistro: {
+                cedula: cedula,
+              },
+              loaded: true,
+              visible: true
+            }
+            )
+          }
+        })
+        .catch(e => {
           this.setState({
             formRegistro: {
               cedula: cedula,
@@ -199,14 +220,18 @@ export default class Home extends Component {
             visible: true
           }
           )
-        }
-      })
-      .catch(e => {
-        alert(e)
-        this.setState({
-          loaded: true,
-        })
-      });
+        });
+    } catch (error) {
+      this.setState({
+        formRegistro: {
+          cedula: cedula,
+        },
+        loaded: true,
+        visible: true
+      }
+      )
+    }
+
 
   }
   close = () => {
@@ -274,7 +299,8 @@ export default class Home extends Component {
 
 
 
-  register_user = () => {
+  async register_user() {
+
     const {
       loaded,
       formRegistro,
@@ -290,6 +316,16 @@ export default class Home extends Component {
     var user_name = formRegistro.names;
     var user_lastname = formRegistro.lastnames;
     var user_monto = facturaData.monto;
+    console.log("pruebaaa", user_monto)
+    if (user_monto == "") {
+      try {
+        const value = await AsyncStorage.getItem('@MySuperStore:key');
+        console.log("el ", value)
+        var user_monto = value;
+      } catch (error) {
+        console.log("Error retrieving data" + error);
+      }
+    }
     var user_cedula = facturaData.cedula;
     var user_cantidad = facturaData.cantidad;
     var user_total = Number(user_monto * user_cantidad).toFixed(2);
@@ -323,6 +359,7 @@ export default class Home extends Component {
       this.setState({
         visible: false, loaded: true
       });
+      this.getKey();
     }
     );
 
@@ -337,7 +374,6 @@ export default class Home extends Component {
           console.log('Results', results.rowsAffected);
           if (results.rowsAffected > 0) {
             console.log("correcto")
-
           } else {
             alert('Registro fallido');
 
