@@ -34,7 +34,7 @@ export default class Map extends Component {
       user_id: "",
       trans: false,
       online: false,
-      date: date_invoice
+      date: ""
     };
     this.view_user(false);
   }
@@ -224,6 +224,7 @@ export default class Map extends Component {
             this.setState({ trans: false });
           });
 
+
         /* Crear factura */
         //console.log(this.state.partner_id);
 
@@ -247,7 +248,7 @@ export default class Map extends Component {
         const dataFact = {
           partner_id: partner_id,
           type: "out_invoice",
-          //  date_invoice: f.getFullYear() + "-" + month + "-" + f.getDate(),
+          //date_invoice: f.getFullYear() + "-" + month + "-" + f.getDate(),
           date_invoice: this.state.date,
           total: user_total,
           montoiva: user_iva,
@@ -326,7 +327,7 @@ export default class Map extends Component {
               account_id: account_id,
               product_id: this.state.product1_id,
               quantity: user_cantidad,
-              price_unit: "1.6",
+              price_unit: 1.6,              
               invoice_line_tax_ids: [[6, 0, this.state.taxes1_id]]
             },
             context
@@ -338,16 +339,22 @@ export default class Map extends Component {
             console.log(e)
             this.setState({ trans: false });
           });
-        await odoo
+
+          
+          /*
+          await odoo
           .create(
             "account.invoice.tax",
             [
               {
-                name: "407 12%",
+                name: "401",
                 invoice_id: invoice_id,
-                invoice_line_tax_ids: [[6, 0, this.state.taxes1_id]],
+                invoice_line_tax_ids:  this.state.taxes1_id,
                 account_id: account_id,
-                amount: user_iva
+                amount: user_iva,
+                sequence:"200",
+                manual: 1,
+                base: 100
               },
               {
                 name: "405 0%",
@@ -365,7 +372,7 @@ export default class Map extends Component {
             console.log(e);
             this.setState({ trans: false });
 
-          });
+          });*/
         await odoo
           .create(
             "account.invoice.line",
@@ -389,6 +396,18 @@ export default class Map extends Component {
             console.log(e);
             this.setState({ loaded: true, trans: true });
           });
+          var par = {
+            model: 'account.invoice',
+            method: 'compute_taxes',
+            args: [invoice_id],
+            kwargs: {},
+        };//params
+
+          await odoo.rpc_call('/web/dataset/call_kw', par)
+          .then(response => { /* ... */ })
+          .catch(e => { /* ... */ })
+       
+
         this.refs.toast.show("Información facturada", 1500);
 
       } catch (e) {
@@ -397,6 +416,7 @@ export default class Map extends Component {
     } catch (e) {
       this.setState({ loaded: true });
     }
+
   }
 
   async getKey() {
@@ -445,6 +465,7 @@ export default class Map extends Component {
     });
   };
   view_user = val => {
+    console.log("agggggggggggggggggggggggggggggggggggggggggggggg")
     db.transaction(tx => {
       tx.executeSql("SELECT * FROM table_user", [], (tx, results) => {
         var temp = [];
